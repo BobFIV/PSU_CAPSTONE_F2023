@@ -1,0 +1,78 @@
+# https://mbarkt3sto.hashnode.dev/working-with-http-files-in-visual-studio-code
+
+
+@baseUrl = http://10.71.71.170:8080
+@aeName = CMyApplication
+@cseName = cse-in
+
+
+
+### New request
+GET {{baseUrl}}/{{cseName}} HTTP/1.1
+Accept: application/json
+Connection: keep-alive
+X-M2M-Origin: CAdmin
+X-M2M-Ri: riRetCse
+X-M2M-Rvi: 4
+Content-Type: application/json
+
+
+### Create a <contentInstance> resource under the <container> resource  (note that ACME is sensitive to the space before ty=4; error does not reflect it)
+POST {{baseUrl}}/{{cseName}}/CMyApplication/command HTTP/1.1
+X-M2M-Origin: CMyApplication
+X-M2M-RI: riCreCin
+X-M2M-RVI: 4
+Content-Type: application/json;ty=4
+Connection: close
+
+{
+    "m2m:cin": {
+        "con": "0"
+    }
+}
+
+
+### Retrieve the <contentInstance> resource
+GET {{baseUrl}}/{{cseName}}/{{aeName}}/command/la HTTP/1.1
+Accept: application/json
+Connection: keep-alive
+X-M2M-Origin: CMyApplication
+X-M2M-Ri: riRetCin
+X-M2M-Rvi: 4
+Content-Type: application/json
+
+
+### Create a <flexContainer> resource under the <AE> resource
+# https://github.com/ankraft/ACME-oneM2M-CSE/blob/master/docs/Importing.md
+POST {{baseUrl}}/{{cseName}}/{{aeName}} HTTP/1.1
+X-M2M-Origin: CMyApplication
+X-M2M-RI: riCreFC
+X-M2M-RVI: 4
+Content-Type: application/json;ty=28
+Connection: close
+
+{
+    "cod:color" : {
+                "rn": "Color",
+                "cnd": "org.onem2m.common.moduleclass.colour",
+                "red": 0,
+                "green": 255,
+                "blue": 0
+            }
+}
+
+
+### Create a <node> resource under the <container> resource  (note that ACME is sensitive to the space before ty=4; error does not reflect it)
+POST {{baseUrl}}/{{cseName}} HTTP/1.1
+X-M2M-Origin: CAdmin
+X-M2M-RI: riCreNode
+X-M2M-RVI: 4
+Content-Type: application/json;ty=14
+Connection: close
+
+{
+    "m2m:nod": {
+        "rn": "testNode",
+        "ni": "testNodeID"
+    }
+}
