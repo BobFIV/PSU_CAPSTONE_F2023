@@ -1,0 +1,29 @@
+[Nordic_UART_Service]# select-attribute /org/bluez/hci0/dev_CA_67_45_DC_EE_05/service0010/char0011
+[Nordic_UART_Service:/service0010/char0011]# attribute-info
+Characteristic - Nordic UART RX
+	UUID: 6e400003-b5a3-f393-e0a9-e50e24dcca9e
+	Service: /org/bluez/hci0/dev_CA_67_45_DC_EE_05/service0010
+	Notifying: no
+	Flags: notify
+	MTU: 0x0017
+[Nordic_UART_Service:/service0010/char0011]# notify on
+[CHG] Attribute /org/bluez/hci0/dev_CA_67_45_DC_EE_05/service0010/char0011 Notifying: yes
+Notify started
+[CHG] Attribute /org/bluez/hci0/dev_CA_67_45_DC_EE_05/service0010/char0011 Value:
+  68 69 0d                                         hi.             
+[CHG] Attribute /org/bluez/hci0/dev_CA_67_45_DC_EE_05/service0010/char0011 Value:
+  73 61 6d 70 6c 65 20 74 65 73 74 0d              sample test.    
+[Nordic_UART_Service:/service0010/char0011]# select-attribute /org/bluez/hci0/dev_CA_67_45_DC_EE_05/service0010/char0014
+[Nordic_UART_Service:/service0010/char0014]# attribute-info 
+Characteristic - Nordic UART TX
+	UUID: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
+	Service: /org/bluez/hci0/dev_CA_67_45_DC_EE_05/service0010
+	Flags: write-without-response
+	Flags: write
+	MTU: 0x0017
+[Nordic_UART_Service:/service0010/char0014]# write 110
+Attempting to write /org/bluez/hci0/dev_CA_67_45_DC_EE_05/service0010/char0014
+[Nordic_UART_Service:/service0010/char0014]# write 111
+Attempting to write /org/bluez/hci0/dev_CA_67_45_DC_EE_05/service0010/char0014
+[Nordic_UART_Service:/service0010/char0014]# write 0x58
+Attempting to write /org/bluez/hci0/dev_CA_67_45_DC_EE_05/service0010/char0014
