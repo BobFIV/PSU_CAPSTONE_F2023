@@ -42,10 +42,18 @@ data_chrc = ble_service.getCharacteristics(uuidConfig)[0]
 data_chrc.write(bytes("Connect with rPi", "utf-8"))
 
 
+#uuidConfig_read = btle.UUID(BLE_CHARACTERISTIC_RX_UUID)
+#data_chrc_read = ble_service.getCharacteristics(uuidConfig_read)[0]
+
 time.sleep(1.0) # Allow sensor to stabilise
 while True:
-    if dev.waitForNotifications(1.0):
-        # handleNotification() was called
-        
-        continue
-    print("Waiting...")
+	if dev.waitForNotifications(1.0):
+		
+		# handleNotification() was called
+		continue
+	print("Waiting...")
+	#val = binascii.b2a_hex(data_chrc_read.read())
+	#val = binascii.unhexlify(val)
+	#val = struct.unpack('f', val)[0]
+	#print("Waiting... read value: "+val)
+    
