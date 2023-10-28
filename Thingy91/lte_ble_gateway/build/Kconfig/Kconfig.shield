@@ -1,0 +1,3 @@
+osource "c:/users/yuchi/onedrive/desktop/hci_lpuart/boards/shields/*/Kconfig.shield"
+osource "c:/users/yuchi/onedrive/desktop/lte_ble_gateway/lte_ble_gateway/boards/shields/*/Kconfig.shield"
+osource "C:/nordicsemi/v2.4.1/nrf/boards/shields/*/Kconfig.shield"
