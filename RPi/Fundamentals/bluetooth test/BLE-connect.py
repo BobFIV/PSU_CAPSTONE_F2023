@@ -37,10 +37,13 @@ service_uuid = btle.UUID(BLE_SERVICE_UUID)
 ble_service = dev.getServiceByUUID(service_uuid)
 
 uuidConfig = btle.UUID(BLE_CHARACTERISTIC_UUID)
-#data_chrc = ble_service.getCharacteristics(uuidConfig)[1]
+data_chrc = ble_service.getCharacteristics(uuidConfig)[0]
+data_chrc.write(bytes("\x01","utf-8")) 
 
+time.sleep(1.0) # Allow sensor to stabilise
 while True:
     if dev.waitForNotifications(1.0):
         # handleNotification() was called
+        
         continue
     print("Waiting...")
