@@ -8,7 +8,8 @@ BLE_ADDRESS = "CA:67:45:DC:EE:05"
 
 BLE_SERVICE_UUID ="6e400001-b5a3-f393-e0a9-e50e24dcca9e"
 
-BLE_CHARACTERISTIC_UUID= "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+BLE_CHARACTERISTIC_TX_UUID= "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+BLE_CHARACTERISTIC_RX_UUID= "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 
 print("Connecting...")
 dev = btle.Peripheral(BLE_ADDRESS,"random")
@@ -36,9 +37,10 @@ dev.setDelegate( MyDelegate() )
 service_uuid = btle.UUID(BLE_SERVICE_UUID)
 ble_service = dev.getServiceByUUID(service_uuid)
 
-uuidConfig = btle.UUID(BLE_CHARACTERISTIC_UUID)
+uuidConfig = btle.UUID(BLE_CHARACTERISTIC_TX_UUID)
 data_chrc = ble_service.getCharacteristics(uuidConfig)[0]
-data_chrc.write(bytes("\x01","utf-8")) 
+data_chrc.write(bytes("Connect with rPi", "utf-8"))
+
 
 time.sleep(1.0) # Allow sensor to stabilise
 while True:
