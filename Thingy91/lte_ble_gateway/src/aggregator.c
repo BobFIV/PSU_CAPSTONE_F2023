@@ -3,39 +3,53 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
-#include "aggregator.h"
+
 #include <zephyr/kernel.h>
 #include <zephyr/kernel.h>
 #include <stdio.h>
 #include <zephyr/types.h>
 #include <string.h>
 #include <zephyr/irq.h>
+#include <zephyr/logging/log.h>
 
-K_FIFO_DEFINE(aggregator_fifo);
+#include "aggregator.h"
 
-static uint32_t entry_count;
+LOG_MODULE_DECLARE(lte_ble_gw);
 
-struct fifo_entry {
+#define SERIALIZED_DATA_MAX_SIZE 300 // Some number. Probably wrong. To-Do: Update.
+K_FIFO_DEFINE(uplink_aggregator_fifo);
+K_FIFO_DEFINE(downlink_aggregator_fifo);
+
+static uint32_t uplink_entry_count;
+
+static uint32_t downlink_entry_count;
+
+struct uplink_fifo_entry {
 	void *fifo_reserved;
-	uint8_t data[sizeof(struct sensor_data)];
+	uint8_t data[sizeof(struct uplink_data_packet)];
 };
 
-int aggregator_put(struct sensor_data in_data)
+struct downlink_fifo_entry {
+	void *fifo_reserved;
+	uint8_t data[sizeof(struct downlink_data_packet)];
+};
+
+int uplink_aggregator_put(struct uplink_data_packet in_data)
 {
-	struct fifo_entry *fifo_data = NULL;
+	struct uplink_fifo_entry *fifo_data = NULL;
 	uint32_t  lock = irq_lock();
 	int    err  = 0;
 
-	if (entry_count == FIFO_MAX_ELEMENT_COUNT) {
-		fifo_data = k_fifo_get(&aggregator_fifo, K_NO_WAIT);
+	if (uplink_entry_count == FIFO_MAX_ELEMENT_COUNT) {
+		fifo_data = k_fifo_get(&uplink_aggregator_fifo, K_NO_WAIT);
 
 		__ASSERT(fifo_data != NULL, "fifo_data should not be NULL");
 
-		entry_count--;
+		uplink_entry_count--;
 	}
 
 	if (fifo_data == NULL) {
-		fifo_data = k_malloc(sizeof(struct fifo_entry));
+		fifo_data = k_malloc(sizeof(in_data));
 	}
 
 	if (fifo_data == NULL) {
@@ -43,17 +57,17 @@ int aggregator_put(struct sensor_data in_data)
 		goto exit;
 	}
 
-	memcpy(fifo_data->data, &in_data, sizeof(struct sensor_data));
+	memcpy(fifo_data->data, &in_data, sizeof(in_data));
 
-	k_fifo_put(&aggregator_fifo, fifo_data);
-	entry_count++;
+	k_fifo_put(&uplink_aggregator_fifo, fifo_data);
+	uplink_entry_count++;
 
 exit:
 	irq_unlock(lock);
 	return err;
 }
 
-int aggregator_get(struct sensor_data *out_data)
+int uplink_aggregator_get(struct uplink_data_packet *out_data)
 {
 	void  *fifo_data;
 	int   err = 0;
@@ -64,17 +78,81 @@ int aggregator_get(struct sensor_data *out_data)
 
 	uint32_t lock = irq_lock();
 
-	fifo_data = k_fifo_get(&aggregator_fifo, K_NO_WAIT);
+	fifo_data = k_fifo_get(&uplink_aggregator_fifo, K_NO_WAIT);
 	if (fifo_data == NULL) {
 		err = -ENODATA;
 		goto exit;
 	}
 
-	memcpy(out_data, ((struct fifo_entry *)fifo_data)->data,
-	       sizeof(struct sensor_data));
+	memcpy(out_data, ((struct uplink_fifo_entry *)fifo_data)->data,
+	       sizeof(struct uplink_data_packet));
 
 	k_free(fifo_data);
-	entry_count--;
+	uplink_entry_count--;
+
+exit:
+	irq_unlock(lock);
+	return err;
+}
+
+
+
+
+int downlink_aggregator_get(struct downlink_data_packet *out_data)
+{
+	void  *fifo_data;
+	int   err = 0;
+
+	if (out_data == NULL) {
+		return -EINVAL;
+	}
+
+	uint32_t lock = irq_lock();
+
+	fifo_data = k_fifo_get(&uplink_aggregator_fifo, K_NO_WAIT);
+	if (fifo_data == NULL) {
+		err = -ENODATA;
+		goto exit;
+	}
+
+	memcpy(out_data, ((struct downlink_fifo_entry *)fifo_data)->data,
+	       sizeof(struct downlink_data_packet));
+
+	k_free(fifo_data);
+	downlink_entry_count--;
+
+exit:
+	irq_unlock(lock);
+	return err;
+}
+
+int downlink_aggregator_put(struct downlink_data_packet in_data)
+{
+	struct downlink_fifo_entry *fifo_data = NULL;
+	uint32_t  lock = irq_lock();
+	int    err  = 0;
+
+	if (downlink_entry_count == FIFO_MAX_ELEMENT_COUNT) {
+		fifo_data = k_fifo_get(&downlink_aggregator_fifo, K_NO_WAIT);
+
+		__ASSERT(fifo_data != NULL, "fifo_data should not be NULL");
+
+		downlink_entry_count--;
+	}
+
+	if (fifo_data == NULL) {
+		fifo_data = k_malloc(sizeof(struct downlink_fifo_entry));
+	}
+
+	if (fifo_data == NULL) {
+		err = -ENOMEM;
+		goto exit;
+	}
+
+	memcpy(fifo_data->data, &in_data, sizeof(struct downlink_data_packet));
+
+	k_fifo_put(&downlink_aggregator_fifo, fifo_data);
+	downlink_entry_count++;
 
 exit:
 	irq_unlock(lock);
@@ -87,7 +165,7 @@ void aggregator_clear(void)
 	uint32_t lock = irq_lock();
 
 	while (1) {
-		fifo_data = k_fifo_get(&aggregator_fifo, K_NO_WAIT);
+		fifo_data = k_fifo_get(&uplink_aggregator_fifo, K_NO_WAIT);
 
 		if (fifo_data == NULL) {
 			break;
@@ -96,11 +174,18 @@ void aggregator_clear(void)
 		k_free(fifo_data);
 	};
 
-	entry_count = 0;
+	uplink_entry_count = 0;
+
+	while (1) {
+		fifo_data = k_fifo_get(&downlink_aggregator_fifo, K_NO_WAIT);
+
+		if (fifo_data == NULL) {
+			break;
+		}
+
+		k_free(fifo_data);
+	};
+	downlink_entry_count = 0;
 	irq_unlock(lock);
 }
 
-int aggregator_element_count_get(void)
-{
-	return entry_count;
-}

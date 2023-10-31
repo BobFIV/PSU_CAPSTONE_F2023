@@ -11,40 +11,18 @@
 #include <zephyr/bluetooth/uuid.h>
 #include <bluetooth/gatt_dm.h>
 #include <bluetooth/scan.h>
+#include <bluetooth/conn_ctx.h>
+
 
 #include <dk_buttons_and_leds.h>
 #include <zephyr/sys/byteorder.h>
 
-
-#include <net/nrf_cloud.h>
+#include <stdio.h>
 #include <zephyr/logging/log.h>
 #include "aggregator.h"
 
+
 LOG_MODULE_DECLARE(lte_ble_gw);
-
-/* Thinghy advertisement UUID */
-/*
-#define BT_UUID_THINGY_VAL \
-	BT_UUID_128_ENCODE(0xef680100, 0x9b35, 0x4933, 0x9b10, 0x52ffa9740042)
-
-#define BT_UUID_THINGY \
-	BT_UUID_DECLARE_128(BT_UUID_THINGY_VAL)
-	*/
-/* Thingy service UUID */
-/*
-#define BT_UUID_TMS_VAL \
-	BT_UUID_128_ENCODE(0xef680400, 0x9b35, 0x4933, 0x9b10, 0x52ffa9740042)
-
-#define BT_UUID_TMS \
-	BT_UUID_DECLARE_128(BT_UUID_TMS_VAL) */
-		/* Thingy characteristic UUID */
-/*
-#define BT_UUID_TOC_VAL \
-	BT_UUID_128_ENCODE(0xef680403, 0x9b35, 0x4933, 0x9b10, 0x52ffa9740042)
-
-#define BT_UUID_TOC \
-	BT_UUID_DECLARE_128(BT_UUID_TOC_VAL) */
-//#define BT_UUID_GATT_CCC BT_UUID_DECLARE_16(0x2902)
 
 #define BT_UUID_ESP32_SERVICE_VAL \
     BT_UUID_128_ENCODE(0x6E400001, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
@@ -61,10 +39,79 @@ LOG_MODULE_DECLARE(lte_ble_gw);
 #define BT_UUID_ESP32_TX \
     BT_UUID_DECLARE_128(BT_UUID_ESP32_TX_VAL)
 
+/*
+#define BT_UUID_rPI_SERVICE_VAL \
+    BT_UUID_128_ENCODE(0x6E400001, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
+#define BT_UUID_rPI_SERVICE \
+    BT_UUID_DECLARE_128(BT_UUID_rPI__SERVICE_VAL)
 
-extern void alarm(void);
+#define BT_UUID_rPI_RX_VAL \
+    BT_UUID_128_ENCODE(0x6E400002, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
+#define BT_UUID_rPI_RX \
+    BT_UUID_DECLARE_128(BT_UUID_rPI__RX_VAL)
+
+#define BT_UUID_rPI_TX_VAL \
+    BT_UUID_128_ENCODE(0x6E400003, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
+#define BT_UUID_rPI_TX \
+    BT_UUID_DECLARE_128(BT_UUID_rPI__TX_VAL)
+*/
+
+#define MAX_CONNECTED_DEVICES 5
+
+#define BT_NAME_MAX_LEN 248	//super overkill but this is the default, I suppose?
+
+struct ble_device {	//device connected struct.
+    struct bt_conn *conn;
+    enum ble_destination destination;		//device name: i.e. Rasperry Pi, ESP32, etc.
+	uint16_t rx_handle;
+    uint16_t tx_handle;
+};
+
+static struct ble_device devices_list[MAX_CONNECTED_DEVICES];
+
+struct bt_conn* get_conn_from_destination(enum ble_destination destination) {
+    for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
+        if (devices_list[i].destination == destination) {
+            return devices_list[i].conn;
+        }
+    }
+    return NULL; // No connection found for the given destination
+}
+
+enum ble_destination get_destination_from_conn(struct bt_conn *conn) {
+    for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
+		if (devices_list[i].conn == conn) {
+			return devices_list[i].destination;
+		}
+	}
+	return DESTINATION_UNKNOWN; // No destination found for the given connection
+}
+
+//Function prototyping for the device name function.
+char *get_device_name(struct bt_conn *conn);
 
 
+static void add_connection(struct bt_conn *conn) {
+    for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
+        if (!devices_list[i].conn) {
+            devices_list[i].conn = conn;
+            devices_list[i].destination = DESTINATION_UNKNOWN;
+			devices_list[i].rx_handle = 0;
+			devices_list[i].tx_handle = 0; //populate destination, rx and tx after disovery.
+            break;
+        }
+    }
+}
+
+static void remove_connection(struct bt_conn *conn) {
+    for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
+        if (devices_list[i].conn == conn) {
+            devices_list[i].conn = NULL;
+            devices_list[i].destination = DESTINATION_UNKNOWN; // Set to an "unknown" or "unset" value
+            break;
+        }
+    }
+}
 
 static uint8_t on_received(struct bt_conn *conn,
 			struct bt_gatt_subscribe_params *params,
@@ -74,6 +121,33 @@ static uint8_t on_received(struct bt_conn *conn,
 	if (length > 0) {
 		// Log the received data as a hex string
 		LOG_HEXDUMP_INF(data, length, "Received data:");
+		struct uplink_data_packet data_packet;
+		//To-Do: Smart IPE to implement data logic. This will determine packet type.
+		/*
+		if (something)
+			packet.type = FIRMWARE_UPDATE;
+		else if (something else)
+			packet.type = IMAGE_DATA;
+		else
+			packet.type = TEXT;
+		//To-Do: Smart IPE to implement data logic. This will determine packet source.
+		if (something)
+			packet.source = SOURCE_ESP32;
+		else
+			packet.source = SOURCE_RaspberryPi;
+		*/
+		//For now:
+		data_packet.type = uplink_TEXT;
+		data_packet.source = SOURCE_ESP32;
+		//setting length and copying data.
+		data_packet.length = MIN(length, ENTRY_MAX_SIZE);
+		memcpy(data_packet.data, data, data_packet.length);
+
+		//Add the packet to the aggregator.
+		int err = uplink_aggregator_put(data_packet);
+		if (err) {
+			LOG_ERR("Failed to put data into aggregator, err %d", err);
+		}
 
 	} else {
 		LOG_DBG("Notification with 0 length");
@@ -81,19 +155,58 @@ static uint8_t on_received(struct bt_conn *conn,
 	return BT_GATT_ITER_CONTINUE;
 }
 
-static void on_transmitted(const struct bt_gatt_subscribe_params *params,
+static uint8_t on_transmitted(struct bt_conn *conn, struct bt_gatt_subscribe_params *params,
 			   const void *data, uint16_t length)
 {
 	if (!data) {
 		LOG_INF("Unsubscribed from TX notifications");
-		return;
+		return 0;
 	}
 
-	// Handle the transmitted data here
-	LOG_INF("Transmitted data: %s", (char *)data);
+	if (length == 0) {
+		LOG_WRN("Received empty TX notification");
+		return 0;
+	}
 
+	// Log the transmitted data as a string (assuming it's a null-terminated string)
+	LOG_INF("Transmitted data (string): %.*s", length, (char *)data);
+
+	// Log the transmitted data in hexadecimal format
+	LOG_HEXDUMP_INF(data, length, "Transmitted data (hex):");
+
+	return 0;
 }
 
+
+
+int ble_transmit(struct bt_conn *conn, uint8_t *data, size_t length) {
+    if (!conn || !data || !length) {
+        return -EINVAL;
+    }
+
+    struct ble_device *device = NULL;
+    for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
+        if (devices_list[i].conn == conn) {
+            device = &devices_list[i];
+            break;
+        }
+    }
+
+    if (!device) {
+        LOG_ERR("Device not found for connection");
+        return -ENODEV;
+    }
+
+	uint16_t handle_to_use = device->tx_handle;		//do I use tx or rx to transmit?	
+
+    int err = bt_gatt_write_without_response(conn, handle_to_use, data, length, false);
+    if (err) {
+        LOG_ERR("Failed to send data over BLE: %d", err);
+        return err;
+    }
+
+    return 0;
+}
 
 static void discovery_completed(struct bt_gatt_dm *disc, void *ctx)
 {
@@ -112,38 +225,67 @@ static void discovery_completed(struct bt_gatt_dm *disc, void *ctx)
     const struct bt_gatt_dm_attr *chrc;
     const struct bt_gatt_dm_attr *desc;
 
-    // Discover RX characteristic
-    chrc = bt_gatt_dm_char_by_uuid(disc, BT_UUID_ESP32_RX);
-    if (!chrc) {
-        LOG_ERR("Missing ESP32 RX characteristic");
-        goto release;
-    }
-    param_rx.value_handle = chrc->handle;
+    // For RX characteristic
+	chrc = bt_gatt_dm_char_by_uuid(disc, BT_UUID_ESP32_RX);
+	if (!chrc) {
+		LOG_ERR("Missing ESP32 RX characteristic");
+		goto release;
+	}
+	param_rx.value_handle = chrc->handle;
 
-    // Discover TX characteristic
-    chrc = bt_gatt_dm_char_by_uuid(disc, BT_UUID_ESP32_TX);
-    if (!chrc) {
-        LOG_ERR("Missing ESP32 TX characteristic");
-        goto release;
-    }
-    param_tx.value_handle = chrc->handle;
+	desc = bt_gatt_dm_desc_by_uuid(disc, chrc, BT_UUID_GATT_CCC);
+	if (!desc) {
+		LOG_ERR("Missing RX CCC descriptor");
+		goto release;
+	}
+	param_rx.ccc_handle = desc->handle;
 
-    desc = bt_gatt_dm_desc_by_uuid(disc, chrc, BT_UUID_GATT_CCC);
-    if (!desc) {
-        LOG_ERR("Missing CCC descriptor");
-        goto release;
-    }
+	err = bt_gatt_subscribe(bt_gatt_dm_conn_get(disc), &param_rx);
+	if (err) {
+		LOG_ERR("Subscribe RX failed (err %d)", err);
+	}
 
-    param_rx.ccc_handle = desc->handle;
-    err = bt_gatt_subscribe(bt_gatt_dm_conn_get(disc), &param_rx);
-    if (err) {
-        LOG_ERR("Subscribe RX failed (err %d)", err);
-    }
+	// For TX characteristic
+	chrc = bt_gatt_dm_char_by_uuid(disc, BT_UUID_ESP32_TX);
+	if (!chrc) {
+		LOG_ERR("Missing ESP32 TX characteristic");
+		goto release;
+	}
+	param_tx.value_handle = chrc->handle;
 
-    param_tx.ccc_handle = desc->handle;
-    err = bt_gatt_subscribe(bt_gatt_dm_conn_get(disc), &param_tx);
-    if (err) {
-        LOG_ERR("Subscribe TX failed (err %d)", err);
+	desc = bt_gatt_dm_desc_by_uuid(disc, chrc, BT_UUID_GATT_CCC);
+	if (!desc) {
+		LOG_ERR("Missing TX CCC descriptor");
+		goto release;
+	}
+	param_tx.ccc_handle = desc->handle;
+
+	err = bt_gatt_subscribe(bt_gatt_dm_conn_get(disc), &param_tx);
+	if (err) {
+		LOG_ERR("Subscribe TX failed (err %d)", err);
+	}
+
+	
+    struct bt_conn *conn = bt_gatt_dm_conn_get(disc);
+    for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
+        if (devices_list[i].conn == conn) {
+            devices_list[i].rx_handle = param_rx.value_handle;
+            devices_list[i].tx_handle = param_tx.value_handle;
+
+			char *device_name = get_device_name(conn);
+			if (device_name) {
+				// Now you can use the device_name to determine the device type
+				if (strncmp(device_name, "ESP32-", 6) == 0) {
+					devices_list[i].destination = DESTINATION_ESP32;
+				} else if (strncmp(device_name, "RaspberryPi-", 12) == 0) {			//12 chars for RaspberryPi- then add a number.
+					devices_list[i].destination = DESTINATION_RaspberryPi;
+				} else {
+					devices_list[i].destination = DESTINATION_UNKNOWN;
+				}
+			}
+
+            break;
+        }
     }
 
 release:
@@ -153,11 +295,30 @@ release:
     }
 }
 
+char *get_device_name(struct bt_conn *conn) {
+    static char name[BT_NAME_MAX_LEN + 1]; // +1 for null-terminator
+    struct bt_conn_info info;
 
-static void discovery_service_not_found(struct bt_conn *conn, void *ctx)
-{
-	LOG_ERR("Thingy orientation service not found!");
+    if (!conn) {
+        return NULL;
+    }
+
+    if (bt_conn_get_info(conn, &info) < 0) {
+        return NULL;
+    }
+
+    // Assuming you're dealing with LE connections
+    if (info.type == BT_CONN_TYPE_LE) {
+        strncpy(name, info.le.dst->a.val, BT_NAME_MAX_LEN);
+        name[BT_NAME_MAX_LEN] = '\0'; // Ensure null-termination
+        return name;
+    }
+
+    return NULL;
 }
+
+
+
 
 static void discovery_error_found(struct bt_conn *conn, int err, void *ctx)
 {
@@ -166,32 +327,41 @@ static void discovery_error_found(struct bt_conn *conn, int err, void *ctx)
 
 static struct bt_gatt_dm_cb discovery_cb = {
 	.completed = discovery_completed,
-	.service_not_found = discovery_service_not_found,
 	.error_found = discovery_error_found,
 };
 
-static void connected(struct bt_conn *conn, uint8_t conn_err)
-{
-	int err;
-	char addr[BT_ADDR_LE_STR_LEN];
+static void connected(struct bt_conn *conn, uint8_t conn_err) {
+    char addr[BT_ADDR_LE_STR_LEN];
 
-	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+    bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
 
-	if (conn_err) {
-		LOG_ERR("Failed to connect to %s (%u)", addr, conn_err);
-		return;
-	}
+    if (conn_err) {
+        LOG_ERR("Failed to connect to %s (%u)", addr, conn_err);
+        return;
+    }
 
-	LOG_INF("Connected: %s", addr);
+    LOG_INF("Connected: %s", addr);
+    add_connection(conn);  // Add the connection to the list
 
-	err = bt_gatt_dm_start(conn, BT_UUID_ESP32_SERVICE, &discovery_cb, NULL);
-	if (err) {
-		LOG_ERR("Could not start service discovery, err %d", err);
-	}
+    int err = bt_gatt_dm_start(conn, BT_UUID_ESP32_SERVICE, &discovery_cb, NULL);
+    if (err) {
+        LOG_ERR("Could not start service discovery, err %d", err);
+    }
 }
+
+static void disconnected(struct bt_conn *conn, uint8_t reason) {
+    char addr[BT_ADDR_LE_STR_LEN];
+
+    bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+
+    LOG_INF("Disconnected: %s, Reason: %u", addr, reason);
+    remove_connection(conn);  // Remove the connection from the list
+}
+
 
 static struct bt_conn_cb conn_callbacks = {
 	.connected = connected,
+	.disconnected = disconnected,
 };
 
 void scan_filter_match(struct bt_scan_device_info *device_info,

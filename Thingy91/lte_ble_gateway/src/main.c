@@ -23,13 +23,14 @@
 
 #include "mqtt_connection.h"
 #include "ble.h"
+#include "mqtt_ble_pipe.h"
 
 
 static K_SEM_DEFINE(lte_connected, 0, 1);
 /* The mqtt client struct */
-static struct mqtt_client client;
+struct mqtt_client client;
 /* File descriptor */
-static struct pollfd fds;
+struct pollfd fds;
 
 LOG_MODULE_REGISTER(lte_ble_gw, CONFIG_LTE_BLE_GW_LOG_LEVEL);
 
@@ -56,6 +57,7 @@ LOG_MODULE_REGISTER(lte_ble_gw, CONFIG_LTE_BLE_GW_LOG_LEVEL);
  */
 #define RETRY_CONNECT_WAIT K_MSEC(90000)
 
+//To do: Update LEDs.
 enum {
 	LEDS_INITIALIZING       = LED_ON(0),
 	LEDS_LTE_CONNECTING     = LED_BLINK(DK_LED3_MSK),
@@ -66,24 +68,16 @@ enum {
 	LEDS_ERROR              = LED_ON(DK_ALL_LEDS_MSK)
 } display_state;
 
-/* Variable to keep track of nRF cloud user association request. */
-static atomic_val_t association_requested;
 
-/* Sensor data */
-static struct nrf_modem_gnss_nmea_data_frame gnss_nmea_data;
-static uint32_t gnss_cloud_data_tag = 0x1;
-static atomic_val_t send_data_enable;
+
 
 /* Structures for work */
-static struct k_work_delayable leds_update_work;
-static struct k_work_delayable connect_work;
-//struct k_work_delayable aggregated_work;
-//static struct k_work agps_request_work;
+struct k_work_delayable leds_update_work;
+struct k_work_delayable periodic_transmit_work;
+struct k_work_delayable periodic_publish_work;
 
-//static struct nrf_modem_gnss_pvt_data_frame last_pvt;
-//static bool nrf_modem_gnss_fix;
 
-static bool cloud_connected;
+
 
 enum error_type {
 	ERROR_NRF_CLOUD,
@@ -225,9 +219,11 @@ static void button_handler(uint32_t buttons, uint32_t has_changed)
 static void work_init(void)
 {
 	k_work_init_delayable(&leds_update_work, leds_update);
-	//k_work_init_delayable(&connect_work, cloud_connect);
-	//k_work_init_delayable(&aggregated_work, send_aggregated_data);
 	k_work_schedule(&leds_update_work, LEDS_UPDATE_INTERVAL);
+	k_work_init_delayable(&periodic_publish_work, publish_aggregated_data);
+	k_work_schedule(&periodic_publish_work, K_MSEC(100));
+	k_work_init_delayable(&periodic_transmit_work, transmit_aggregated_data);
+	k_work_schedule(&periodic_transmit_work, K_MSEC(100));
 }
 
 /**@brief Configures modem to provide LTE link. Blocks until link is

@@ -6,6 +6,8 @@
 
 #ifndef _AGGREGATOR_H_
 #define _AGGREGATOR_H_
+#include <stdint.h>
+
 
 /*
  * Simple aggregator module which can have sensordata added and retrieved in a
@@ -16,28 +18,58 @@
  *
  * Note: The module is single instance to allow simple global access to the
  * data.
+ * 
+ * This is edited from the original sample program.
  */
-#include <nrf_modem_gnss.h>
 
-/* In this sample the GPS data is 83 byte + a data sequence tag,
- * so 87 byte is used.
- */
-#define ENTRY_MAX_SIZE (NRF_MODEM_GNSS_NMEA_MAX_LEN + 4)
+
+#define ENTRY_MAX_SIZE (100)				//This is probably wrong. Will have to change later.
 #define FIFO_MAX_ELEMENT_COUNT 12
 
-enum sensor_data_type { THINGY_ORIENTATION, GNSS_POSITION };
+enum uplink_data_packet_type {						//Data types for going up are text and image.
+	uplink_TEXT,
+    IMAGE_DATA,
+};
+enum ble_source {
+	SOURCE_ESP32,
+	SOURCE_RaspberryPi,
+};
 
-struct sensor_data {
+struct uplink_data_packet {						//This is the data structure that will be used to store data going upwards to MQTT.
 	uint8_t length;
-	enum sensor_data_type type;
+	enum uplink_data_packet_type type;
+	enum ble_source source;
 	uint8_t data[ENTRY_MAX_SIZE];
 };
 
+enum downlink_data_packet_type {					//Data types for going down are firmware update and image.
+	downlink_TEXT,
+	FIRMWARE_UPDATE,
+};
+enum ble_destination {					//Destination for data going down is either ESP32 or Raspberry Pi.
+	DESTINATION_ESP32,					
+	DESTINATION_RaspberryPi,
+	DESTINATION_UNKNOWN,
+};
+
+struct downlink_data_packet {				//This is the data structure that is used to store data going downwards to BLE.
+	uint8_t length;
+	enum downlink_data_packet_type type;
+	enum ble_destination destination;
+	uint8_t data[ENTRY_MAX_SIZE];
+};
+
+
+
 int aggregator_init(void);
 
-int aggregator_put(struct sensor_data data);
+int uplink_aggregator_put(struct uplink_data_packet data);
 
-int aggregator_get(struct sensor_data *data);
+int uplink_aggregator_get(struct uplink_data_packet *data);
+
+int downlink_aggregator_put(struct downlink_data_packet data);
+
+int downlink_aggregator_get(struct downlink_data_packet *data);
 
 void aggregator_clear(void);
 

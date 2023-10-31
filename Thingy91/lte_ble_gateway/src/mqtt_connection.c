@@ -8,7 +8,10 @@
 #include <nrf_modem_at.h>
 #include <zephyr/logging/log.h>
 #include <dk_buttons_and_leds.h>
+#include <cJSON.h>
 #include "mqtt_connection.h"
+
+#include "aggregator.h"
 
 /* Buffers for MQTT client. */
 static uint8_t rx_buffer[CONFIG_MQTT_MESSAGE_BUFFER_SIZE];
@@ -91,9 +94,12 @@ static void data_print(uint8_t *prefix, uint8_t *data, size_t len)
 	LOG_INF("%s%s", (char *)prefix, (char *)buf);
 }
 
+
+
+
 /**@brief Function to publish data on the configured topic
  */
-/* STEP 7.1 - Define the function data_publish() to publish data */
+/* Define the function data_publish() to publish data */
 int data_publish(struct mqtt_client *c, enum mqtt_qos qos,
 	uint8_t *data, size_t len)
 {
@@ -160,17 +166,54 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 			mqtt_publish_qos1_ack(c, &ack);
 		}
 
-		/* STEP 6.2 - On successful extraction of data */
+		//Extracting data.
 		if (err >= 0) {
 			data_print("Received: ", payload_buf, p->message.payload.len);
-			// Control the LED 
-			if(strncmp(payload_buf,"{\"to\":\"cse-in\",\"op\":2,\"rqi\":\"LED_ON\",\"rvi\":\"3\",\"fr\":\"CAdmin\"}",sizeof("{\"to\":\"cse-in\",\"op\":2,\"rqi\":\"LED_ON\",\"rvi\":\"3\",\"fr\":\"CAdmin\"}")-1) == 0){
-				dk_set_led_on(LED_CONTROL_OVER_MQTT);
+			// Parsing the payload
+			cJSON *json_payload = cJSON_Parse(payload_buf);
+			if (!json_payload)
+			{
+				LOG_ERR("Failed to parse JSON payload");
+				return;
 			}
-			else if(strncmp(payload_buf,"{\"to\":\"cse-in\",\"op\":2,\"rqi\":\"LED_OFF\",\"rvi\":\"3\",\"fr\":\"CAdmin\"}",sizeof("{\"to\":\"cse-in\",\"op\":2,\"rqi\":\"LED_OFF\",\"rvi\":\"3\",\"fr\":\"CAdmin\"}")-1) == 0){
-				dk_set_led_off(LED_CONTROL_OVER_MQTT);
+			//Extracting the "rqi" field
+			cJSON *rqi = cJSON_GetObjectItem(json_payload, "rqi"); //Do I need case sensitive here? Check later.
+			if (rqi && cJSON_IsString(rqi) && (rqi->valuestring != NULL))
+			{
+				if (strcmp(rqi->valuestring, "LED_ON") == 0)	//These are just test functions to make sure string parse worked. I'll get rid of it soon enough.
+				{
+					LOG_INF("LED ON");
+					dk_set_led_on(LED_CONTROL_OVER_MQTT);
+				}
+				else if (strcmp(rqi->valuestring, "LED_OFF") == 0)
+				{
+					LOG_INF("LED OFF");
+					dk_set_led_off(LED_CONTROL_OVER_MQTT);
+				}
+				else
+				{
+					struct downlink_data_packet packet;				//This handles MQTT messages coming down, thus downlink.
+					//packet.type = determine_packet_type(rqi->valuestring); #To-Do: Implement in operation smart IPE
+					packet.type = downlink_TEXT;
+					packet.length = p->message.payload.len;
+					//packet.source = determine_packet_destination(rqi->valuestring); To-Do: Implement in operation smart IPE once Chang gets rPi working.
+					packet.destination = DESTINATION_ESP32;
+					if (p->message.payload.len <= sizeof(packet.data)) {
+						memcpy(packet.data, payload_buf, p->message.payload.len);
+						downlink_aggregator_put(packet);
+					} else {
+						LOG_ERR("Payload size exceeds data packet buffer size");
+					}
+
+				}
 			}
-		/* STEP 6.3 - On failed extraction of data */
+			else
+			{
+				LOG_ERR("Failed to extract rqi");
+			}
+
+			cJSON_Delete(json_payload);
+		
 		// Payload buffer is smaller than the received data 
 		} else if (err == -EMSGSIZE) {
 			LOG_ERR("Received payload (%d bytes) is larger than the payload buffer size (%d bytes).",
