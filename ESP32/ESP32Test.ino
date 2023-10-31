@@ -129,7 +129,7 @@ bool BLESerial::begin(char* localName)
                                             );
     if (pRxCharacteristic == nullptr)
         return false; 
-    pRxCharacteristic->addDescriptor(new BLE2902());
+    //pRxCharacteristic->addDescriptor(new BLE2902());
 
     BLESerialCharacteristicCallbacks* bleSerialCharacteristicCallbacks =  new BLESerialCharacteristicCallbacks(); 
     bleSerialCharacteristicCallbacks->bleSerial = this;  
