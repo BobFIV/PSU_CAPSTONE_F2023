@@ -6,17 +6,6 @@
 
 menu "LTE BLE gateway sample"
 
-config GNSS_SEARCH_INTERVAL
-	int "Interval for starting GNSS search"
-	default 240
-
-config GNSS_SEARCH_TIMEOUT
-	int "Timeout for GNSS search"
-	default 120
-	help
-	  The GNSS will stop acquiring GNSS fix when it times out.
-	  It will restart the search at the start of the next search interval.
-
 config MQTT_PUB_TOPIC
 	string "MQTT publish topic"
 	default "devacademy/publish/topic"
