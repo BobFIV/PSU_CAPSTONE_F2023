@@ -197,7 +197,7 @@ int ble_transmit(struct bt_conn *conn, uint8_t *data, size_t length) {
         return -ENODEV;
     }
 
-	uint16_t handle_to_use = device->tx_handle;		//do I use tx or rx to transmit?	
+	uint16_t handle_to_use = device->rx_handle;		//Should be transmitting to the RX handle of ESP32 (receiver).
 
     int err = bt_gatt_write_without_response(conn, handle_to_use, data, length, false);
     if (err) {
