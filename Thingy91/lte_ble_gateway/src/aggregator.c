@@ -100,24 +100,29 @@ exit:
 
 int downlink_aggregator_get(struct downlink_data_packet *out_data)
 {
+	//LOG_INF ("downlink_aggregator_get called"); //Super spammy.
 	void  *fifo_data;
 	int   err = 0;
-
+	
 	if (out_data == NULL) {
+		//LOG_INF ("OutData is NULL");
 		return -EINVAL;
 	}
 
-	uint32_t lock = irq_lock();
 
-	fifo_data = k_fifo_get(&uplink_aggregator_fifo, K_NO_WAIT);
+	fifo_data = k_fifo_get(&downlink_aggregator_fifo, K_NO_WAIT);
 	if (fifo_data == NULL) {
 		err = -ENODATA;
+		//LOG_INF ("FIFO is Empty"); //Super spammy.
 		goto exit;
 	}
 
+
+	uint32_t lock = irq_lock();
+
 	memcpy(out_data, ((struct downlink_fifo_entry *)fifo_data)->data,
 	       sizeof(struct downlink_data_packet));
-
+	LOG_INF ("downlink_aggregator_get: %s", out_data->data);
 	k_free(fifo_data);
 	downlink_entry_count--;
 
@@ -130,8 +135,8 @@ int downlink_aggregator_put(struct downlink_data_packet in_data)
 {
 	struct downlink_fifo_entry *fifo_data = NULL;
 	uint32_t  lock = irq_lock();
-	int    err  = 0;
-
+	int	err  = 0;
+	LOG_INF ("downlink_aggregator_put called");
 	if (downlink_entry_count == FIFO_MAX_ELEMENT_COUNT) {
 		fifo_data = k_fifo_get(&downlink_aggregator_fifo, K_NO_WAIT);
 
@@ -148,9 +153,9 @@ int downlink_aggregator_put(struct downlink_data_packet in_data)
 		err = -ENOMEM;
 		goto exit;
 	}
-
+	
 	memcpy(fifo_data->data, &in_data, sizeof(struct downlink_data_packet));
-
+	LOG_INF("downlink_aggregator_put: %s", in_data.data);
 	k_fifo_put(&downlink_aggregator_fifo, fifo_data);
 	downlink_entry_count++;
 

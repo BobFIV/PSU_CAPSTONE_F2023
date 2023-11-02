@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <net/nrf_cloud.h>
 #include <zephyr/logging/log.h>
+#include <stdio.h>
 
 
 #include "aggregator.h"
@@ -94,10 +95,10 @@ void transmit_aggregated_data(struct k_work *work) {
     struct downlink_data_packet packet;
     uint8_t serialized_data[SERIALIZED_DATA_MAX_SIZE];
     size_t serialized_length;
-
+    //LOG_INF("Spam!");
     // Continue retrieving and transmitting as long as there's data in the aggregator
     while (downlink_aggregator_get(&packet) == 0) {
-
+       // LOG_INF("Preparing to tranmit downlink data packet");
         // Serialize the data packet (if necessary)
         serialized_length = serialize_downlink_data_packet(&packet, serialized_data, sizeof(serialized_data));
         if (serialized_length == 0) {

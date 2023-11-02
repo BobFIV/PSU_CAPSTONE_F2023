@@ -1,4 +1,4 @@
-# Install script for directory: C:/nordicsemi/v2.4.1/zephyr/subsys
+# Install script for directory: C:/ncs/v2.4.2/zephyr/subsys
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,121 +34,116 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/nordicsemi/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump.exe")
+  set(CMAKE_OBJDUMP "C:/ncs/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/canbus/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/canbus/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/debug/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/debug/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/fb/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/fb/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/fs/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/fs/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/ipc/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/ipc/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/logging/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/logging/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/mgmt/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/mgmt/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/modbus/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/modbus/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/pm/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/pm/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/portability/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/portability/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/random/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/random/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/rtio/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/rtio/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/sd/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/sd/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/stats/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/stats/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/storage/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/storage/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/task_wdt/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/task_wdt/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/testsuite/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/testsuite/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/tracing/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/tracing/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/usb/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/usb/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/bluetooth/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/bluetooth/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/console/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/console/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/net/cmake_install.cmake")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/zephyr/subsys/settings/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/zephyr/subsys/net/cmake_install.cmake")
 endif()
 

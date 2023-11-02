@@ -1,7 +1,7 @@
 The target system is: Generic -  - cortex-m33+nodsp+nofp
-The host system is: Windows - 10.0.22621 - AMD64
+The host system is: Windows - 10.0.19045 - AMD64
 Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
-Compiler: C:/nordicsemi/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc.exe 
+Compiler: C:/ncs/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc.exe 
 Build flags: -mcpu=cortex-m33+nodsp+nofp
 Id flags: -c 
 
@@ -11,7 +11,7 @@ The output was:
 
 Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.o"
 
-The C compiler identification is GNU, found in "C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/CMakeFiles/3.20.5/CompilerIdC/CMakeCCompilerId.o"
+The C compiler identification is GNU, found in "C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/CMakeFiles/3.20.5/CompilerIdC/CMakeCCompilerId.o"
 
 Checking whether the ASM compiler is GNU using "--version" matched "(GNU assembler)|(GCC)|(Free Software Foundation)":
 arm-zephyr-eabi-gcc.exe (Zephyr SDK 0.16.0) 12.2.0

@@ -8,9 +8,10 @@
 #include <nrf_modem_at.h>
 #include <zephyr/logging/log.h>
 #include <dk_buttons_and_leds.h>
-#include <cJSON.h>
+
 #include "mqtt_connection.h"
 
+#include "cJSON.h"
 #include "aggregator.h"
 
 /* Buffers for MQTT client. */
@@ -180,14 +181,14 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 			cJSON *rqi = cJSON_GetObjectItem(json_payload, "rqi"); //Do I need case sensitive here? Check later.
 			if (rqi && cJSON_IsString(rqi) && (rqi->valuestring != NULL))
 			{
-				if (strcmp(rqi->valuestring, "LED_ON") == 0)	//These are just test functions to make sure string parse worked. I'll get rid of it soon enough.
+				if (strcmp(rqi->valuestring, "LED1ON") == 0)	//These are just test functions to make sure string parse worked. I'll get rid of it soon enough.
 				{
-					LOG_INF("LED ON");
+					LOG_INF("LED1ON");
 					dk_set_led_on(LED_CONTROL_OVER_MQTT);
 				}
-				else if (strcmp(rqi->valuestring, "LED_OFF") == 0)
+				else if (strcmp(rqi->valuestring, "LED1OFF") == 0)
 				{
-					LOG_INF("LED OFF");
+					LOG_INF("LED1OFF");
 					dk_set_led_off(LED_CONTROL_OVER_MQTT);
 				}
 				else

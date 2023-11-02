@@ -1,13 +1,13 @@
 # Target labels
  tfm
 # Source files and their labels
-C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/modules/trusted-firmware-m/CMakeFiles/tfm
-C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/modules/trusted-firmware-m/CMakeFiles/tfm.rule
-C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/modules/trusted-firmware-m/CMakeFiles/tfm-complete.rule
-C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-build.rule
-C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-configure.rule
-C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-download.rule
-C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-install.rule
-C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-mkdir.rule
-C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-patch.rule
-C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-update.rule
+C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/modules/trusted-firmware-m/CMakeFiles/tfm
+C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/modules/trusted-firmware-m/CMakeFiles/tfm.rule
+C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/modules/trusted-firmware-m/CMakeFiles/tfm-complete.rule
+C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-build.rule
+C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-configure.rule
+C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-download.rule
+C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-install.rule
+C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-mkdir.rule
+C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-patch.rule
+C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-update.rule

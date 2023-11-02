@@ -56,10 +56,6 @@ _vector_end = .;
 . = ALIGN(4);
 KEEP(*(.gnu.linkonce.irq_vector_table*))
  _vector_end = .;
-. = 0x200;
-_fw_info_start = .;
-KEEP(*(SORT_BY_NAME(.firmware_info*)))
-_fw_info_size = ABSOLUTE(. - _fw_info_start);
  } > FLASH
     text :
  {
@@ -155,7 +151,6 @@ ztest :
  {
   KEEP(*(".dbg_thread_info"));
  } > FLASH
- settings_handler_static_area : SUBALIGN(4) { _settings_handler_static_list_start = .; KEEP(*(SORT_BY_NAME(._settings_handler_static.static.*))); _settings_handler_static_list_end = .; } > FLASH
  symbol_to_keep : ALIGN_WITH_INPUT
  {
   __symbol_to_keep_start = .;
@@ -203,16 +198,6 @@ _nrf_modem_lib_init_cb_list_end = .;
 _nrf_modem_lib_shutdown_cb_list_start = .;
 KEEP(*(SORT_BY_NAME("._nrf_modem_lib_shutdown_cb.*")));
 _nrf_modem_lib_shutdown_cb_list_end = .;
-. = ALIGN(4);
-_fw_info_images_start = .;
-KEEP(*(.fw_info_images))
-_fw_info_images_size = ABSOLUTE((. - _fw_info_images_start) / 4);
-_ext_apis_start = .;
-KEEP(*(.ext_apis))
-_ext_apis_size = ABSOLUTE(. - _ext_apis_start);
-_ext_apis_req_start = .;
-KEEP(*(.ext_apis_req))
-_ext_apis_req_size = ABSOLUTE(. - _ext_apis_req_start);
  . = ALIGN(4);
  } > FLASH
  __rodata_region_end = .;

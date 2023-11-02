@@ -1,8 +1,8 @@
-# Install script for directory: C:/nordicsemi/v2.4.1/modules/tee/tf-m/trusted-firmware-m/secure_fw/partitions
+# Install script for directory: C:/ncs/v2.4.2/modules/tee/tf-m/trusted-firmware-m/secure_fw/partitions
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/install")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,56 +34,56 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/nordicsemi/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump.exe")
+  set(CMAKE_OBJDUMP "C:/ncs/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/secure_fw/partitions/lib/runtime/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/secure_fw/partitions/lib/runtime/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/secure_fw/partitions/crypto/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/secure_fw/partitions/crypto/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/secure_fw/partitions/initial_attestation/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/secure_fw/partitions/initial_attestation/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/secure_fw/partitions/protected_storage/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/secure_fw/partitions/protected_storage/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/secure_fw/partitions/internal_trusted_storage/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/secure_fw/partitions/internal_trusted_storage/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/secure_fw/partitions/platform/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/secure_fw/partitions/platform/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/secure_fw/partitions/firmware_update/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/secure_fw/partitions/firmware_update/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/secure_fw/partitions/ns_agent_tz/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/secure_fw/partitions/ns_agent_tz/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/secure_fw/partitions/ns_agent_mailbox/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/secure_fw/partitions/ns_agent_mailbox/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/secure_fw/partitions/idle_partition/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/secure_fw/partitions/idle_partition/cmake_install.cmake")
 endif()
 

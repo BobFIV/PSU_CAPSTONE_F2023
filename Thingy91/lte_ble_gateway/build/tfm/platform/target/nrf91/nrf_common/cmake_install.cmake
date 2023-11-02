@@ -1,8 +1,8 @@
-# Install script for directory: C:/nordicsemi/v2.4.1/modules/tee/tf-m/trusted-firmware-m/platform/ext/target/nordic_nrf/common/core
+# Install script for directory: C:/ncs/v2.4.2/modules/tee/tf-m/trusted-firmware-m/platform/ext/target/nordic_nrf/common/core
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/install")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,30 +34,30 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/nordicsemi/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump.exe")
+  set(CMAKE_OBJDUMP "C:/ncs/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump.exe")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/install/interface/include/tfm_ioctl_core_api.h")
+   "C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/install/interface/include/tfm_ioctl_core_api.h")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/install/interface/include" TYPE FILE MESSAGE_NEVER FILES "C:/nordicsemi/v2.4.1/modules/tee/tf-m/trusted-firmware-m/platform/ext/target/nordic_nrf/common/core/services/include/tfm_ioctl_core_api.h")
+file(INSTALL DESTINATION "C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/install/interface/include" TYPE FILE MESSAGE_NEVER FILES "C:/ncs/v2.4.2/modules/tee/tf-m/trusted-firmware-m/platform/ext/target/nordic_nrf/common/core/services/include/tfm_ioctl_core_api.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/install/interface/src/tfm_ioctl_core_ns_api.c")
+   "C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/install/interface/src/tfm_ioctl_core_ns_api.c")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/install/interface/src" TYPE FILE MESSAGE_NEVER FILES "C:/nordicsemi/v2.4.1/modules/tee/tf-m/trusted-firmware-m/platform/ext/target/nordic_nrf/common/core/services/src/tfm_ioctl_core_ns_api.c")
+file(INSTALL DESTINATION "C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/install/interface/src" TYPE FILE MESSAGE_NEVER FILES "C:/ncs/v2.4.2/modules/tee/tf-m/trusted-firmware-m/platform/ext/target/nordic_nrf/common/core/services/src/tfm_ioctl_core_ns_api.c")
 endif()
 

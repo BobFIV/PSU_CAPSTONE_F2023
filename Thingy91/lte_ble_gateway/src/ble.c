@@ -98,9 +98,11 @@ static void add_connection(struct bt_conn *conn) {
             devices_list[i].destination = DESTINATION_UNKNOWN;
 			devices_list[i].rx_handle = 0;
 			devices_list[i].tx_handle = 0; //populate destination, rx and tx after disovery.
+			LOG_INF("Connection in array initialized.");
             break;
         }
     }
+	
 }
 
 static void remove_connection(struct bt_conn *conn) {
@@ -117,7 +119,7 @@ static uint8_t on_received(struct bt_conn *conn,
 			struct bt_gatt_subscribe_params *params,
 			const void *data, uint16_t length)
 {
-
+	LOG_INF("Something received...");
 	if (length > 0) {
 		// Log the received data as a hex string
 		LOG_HEXDUMP_INF(data, length, "Received data:");
@@ -137,6 +139,7 @@ static uint8_t on_received(struct bt_conn *conn,
 			packet.source = SOURCE_RaspberryPi;
 		*/
 		//For now:
+		LOG_INF("Received data from ESP32");
 		data_packet.type = uplink_TEXT;
 		data_packet.source = SOURCE_ESP32;
 		//setting length and copying data.
@@ -158,6 +161,7 @@ static uint8_t on_received(struct bt_conn *conn,
 static uint8_t on_transmitted(struct bt_conn *conn, struct bt_gatt_subscribe_params *params,
 			   const void *data, uint16_t length)
 {
+	LOG_INF("Something Transmitted...");
 	if (!data) {
 		LOG_INF("Unsubscribed from TX notifications");
 		return 0;
@@ -180,10 +184,16 @@ static uint8_t on_transmitted(struct bt_conn *conn, struct bt_gatt_subscribe_par
 
 
 int ble_transmit(struct bt_conn *conn, uint8_t *data, size_t length) {
-    if (!conn || !data || !length) {
+	LOG_INF("Transmit called...");
+
+	if (!data || !length)
+	{
+		return -EINVAL;
+	}
+	if (!conn) {
+		LOG_INF("No connection found for destination");
         return -EINVAL;
     }
-
     struct ble_device *device = NULL;
     for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
         if (devices_list[i].conn == conn) {
@@ -197,7 +207,7 @@ int ble_transmit(struct bt_conn *conn, uint8_t *data, size_t length) {
         return -ENODEV;
     }
 
-	uint16_t handle_to_use = device->rx_handle;		//Should be transmitting to the RX handle of ESP32 (receiver).
+	uint16_t handle_to_use = device->tx_handle;		//The 9160dk is the Central. Thus it sends to the TX handle.
 
     int err = bt_gatt_write_without_response(conn, handle_to_use, data, length, false);
     if (err) {
@@ -210,20 +220,34 @@ int ble_transmit(struct bt_conn *conn, uint8_t *data, size_t length) {
 
 static void discovery_completed(struct bt_gatt_dm *disc, void *ctx)
 {
-    int err;
 
-    static struct bt_gatt_subscribe_params param_rx = {
-        .notify = on_received,
+    int err;
+	LOG_INF("discover completed called");
+	
+    struct bt_conn_info info;
+    err = bt_conn_get_info(bt_gatt_dm_conn_get(disc), &info);
+    if (err) {
+        LOG_ERR("Unable to get connection info (err %d)", err);
+    } else {
+        LOG_INF("Connection role: %u", info.role);
+        LOG_INF("Connection type: %u", info.type);
+        LOG_INF("Connection status: %u", info.state);
+    }
+	
+    static struct bt_gatt_subscribe_params param_tx = {	
+		.notify = on_transmitted,
         .value = BT_GATT_CCC_NOTIFY,
+
     };
 
-    static struct bt_gatt_subscribe_params param_tx = {
-        .notify = on_transmitted,
+    static struct bt_gatt_subscribe_params param_rx = {	
+		.notify = on_received,
         .value = BT_GATT_CCC_NOTIFY,
     };
 
     const struct bt_gatt_dm_attr *chrc;
     const struct bt_gatt_dm_attr *desc;
+	const struct bt_gatt_dm_attr *chrc_value;
 
     // For RX characteristic
 	chrc = bt_gatt_dm_char_by_uuid(disc, BT_UUID_ESP32_RX);
@@ -232,6 +256,20 @@ static void discovery_completed(struct bt_gatt_dm *disc, void *ctx)
 		goto release;
 	}
 	param_rx.value_handle = chrc->handle;
+	LOG_INF("ESP32 RX handle: %d", param_rx.value_handle);
+
+	
+
+	chrc_value = bt_gatt_dm_attr_next(disc, chrc); // Get the characteristic value attribute
+	if (!chrc_value) {
+		LOG_ERR("Missing ESP32 RX value");
+		goto release;
+	}
+
+	char uuid_str[37]; // 36 bytes for UUID and 1 byte for '\0'
+	bt_uuid_to_str(chrc_value->uuid, uuid_str, sizeof(uuid_str));
+	LOG_INF("ESP32 RX UUID: %s", uuid_str);
+
 
 	desc = bt_gatt_dm_desc_by_uuid(disc, chrc, BT_UUID_GATT_CCC);
 	if (!desc) {
@@ -239,11 +277,21 @@ static void discovery_completed(struct bt_gatt_dm *disc, void *ctx)
 		goto release;
 	}
 	param_rx.ccc_handle = desc->handle;
+	
 
 	err = bt_gatt_subscribe(bt_gatt_dm_conn_get(disc), &param_rx);
 	if (err) {
-		LOG_ERR("Subscribe RX failed (err %d)", err);
+    LOG_ERR("Subscribe RX failed (err %d)", err);
 	}
+	/* This fails for some reason. 
+	else {
+	k_sleep(K_MSEC(1000));  // Wait for 1 second
+    bool is_subscribed = bt_gatt_is_subscribed(bt_gatt_dm_conn_get(disc), param_rx.value_handle, BT_GATT_CCC_NOTIFY);
+    LOG_INF("RX Characteristic is %ssubscribed for notifications", is_subscribed ? "" : "not ");
+	} 
+	*/
+	
+	
 
 	// For TX characteristic
 	chrc = bt_gatt_dm_char_by_uuid(disc, BT_UUID_ESP32_TX);
@@ -252,6 +300,17 @@ static void discovery_completed(struct bt_gatt_dm *disc, void *ctx)
 		goto release;
 	}
 	param_tx.value_handle = chrc->handle;
+	LOG_INF("ESP32 TX handle: %d", param_tx.value_handle);
+
+	chrc_value = bt_gatt_dm_attr_next(disc, chrc); // Get the characteristic value attribute
+	if (!chrc_value) {
+		LOG_ERR("Missing ESP32 TX value");
+		goto release;
+	}
+
+	bt_uuid_to_str(chrc_value->uuid, uuid_str, sizeof(uuid_str));
+	LOG_INF("ESP32 TX UUID: %s", uuid_str);
+
 
 	desc = bt_gatt_dm_desc_by_uuid(disc, chrc, BT_UUID_GATT_CCC);
 	if (!desc) {
@@ -265,7 +324,6 @@ static void discovery_completed(struct bt_gatt_dm *disc, void *ctx)
 		LOG_ERR("Subscribe TX failed (err %d)", err);
 	}
 
-	
     struct bt_conn *conn = bt_gatt_dm_conn_get(disc);
     for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
         if (devices_list[i].conn == conn) {
@@ -275,19 +333,31 @@ static void discovery_completed(struct bt_gatt_dm *disc, void *ctx)
 			char *device_name = get_device_name(conn);
 			if (device_name) {
 				// Now you can use the device_name to determine the device type
-				if (strncmp(device_name, "ESP32-", 6) == 0) {
+				if (strncmp(device_name, "ESP32", 6) == 0) {
+					LOG_INF("Device is ESP32");
 					devices_list[i].destination = DESTINATION_ESP32;
 				} else if (strncmp(device_name, "RaspberryPi-", 12) == 0) {			//12 chars for RaspberryPi- then add a number.
+					LOG_INF("Device is Raspberry Pi");
 					devices_list[i].destination = DESTINATION_RaspberryPi;
 				} else {
-					devices_list[i].destination = DESTINATION_UNKNOWN;
+					LOG_INF("Device is Unknown. Setting it to ESP32 for now.");
+					devices_list[i].destination = DESTINATION_ESP32;
+
 				}
+				LOG_INF("Device name: %s", device_name);
+				LOG_HEXDUMP_INF(device_name, 6, "Device name:");
 			}
 
             break;
         }
     }
+/* This check always makes the code restart as soon as a connection is added.
+	bool is_subscribed_rx = bt_gatt_is_subscribed(conn, param_rx.value_handle, BT_GATT_CCC_NOTIFY);
+	LOG_INF("RX Characteristic is %ssubscribed for notifications", is_subscribed_rx ? "" : "not ");
 
+	bool is_subscribed_tx = bt_gatt_is_subscribed(conn, param_tx.value_handle, BT_GATT_CCC_NOTIFY);
+	LOG_INF("TX Characteristic is %ssubscribed for notifications", is_subscribed_tx ? "" : "not ");
+*/
 release:
     err = bt_gatt_dm_data_release(disc);
     if (err) {

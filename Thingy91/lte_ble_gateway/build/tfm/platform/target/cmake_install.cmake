@@ -1,8 +1,8 @@
-# Install script for directory: C:/nordicsemi/v2.4.1/nrf/modules/tfm/tfm/boards/nrf9160
+# Install script for directory: C:/ncs/v2.4.2/nrf/modules/tfm/tfm/boards/nrf9160
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/install")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,16 +34,16 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/nordicsemi/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump.exe")
+  set(CMAKE_OBJDUMP "C:/ncs/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/platform/target/nrf91/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/platform/target/nrf91/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/OneDrive/Desktop/lte_ble_gateway/lte_ble_gateway/build/tfm/platform/target/tfm_board/cmake_install.cmake")
+  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/lte_ble_gateway/build/tfm/platform/target/tfm_board/cmake_install.cmake")
 endif()
 

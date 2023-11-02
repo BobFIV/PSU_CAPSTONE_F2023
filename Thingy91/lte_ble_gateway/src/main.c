@@ -220,10 +220,10 @@ static void work_init(void)
 {
 	k_work_init_delayable(&leds_update_work, leds_update);
 	k_work_schedule(&leds_update_work, LEDS_UPDATE_INTERVAL);
-	k_work_init_delayable(&periodic_publish_work, publish_aggregated_data);
-	k_work_schedule(&periodic_publish_work, K_MSEC(100));
 	k_work_init_delayable(&periodic_transmit_work, transmit_aggregated_data);
-	k_work_schedule(&periodic_transmit_work, K_MSEC(100));
+	k_work_schedule(&periodic_transmit_work, K_MSEC(10000));
+	k_work_init_delayable(&periodic_publish_work, publish_aggregated_data);
+	k_work_schedule(&periodic_publish_work, K_MSEC(10000));
 }
 
 /**@brief Configures modem to provide LTE link. Blocks until link is
@@ -264,7 +264,7 @@ int main(void)
 	LOG_INF("LTE Sensor Gateway sample started");
 
 	
-	ble_init();		//Initializes bluetooth (ble.c)
+	
 	
 
 	if (dk_leds_init() != 0) {
@@ -287,8 +287,7 @@ int main(void)
 		return 0;
 	}
 	work_init();		//Currently just using it to blink some LEDs.
-//	cloud_init();
-//	cloud_connect(NULL);
+	ble_init();		    //Initializes bluetooth (ble.c)
 do_connect:
 	if (connect_attempt++ > 0) {
 		LOG_INF("Reconnecting in %d seconds...",
