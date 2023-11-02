@@ -10,8 +10,8 @@
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
 
-#define DEVICE_NUMBER "1"
-#define DEVICE_NAME "ESP32-" DEVICE_NUMBER
+//#define DEVICE_NUMBER "1"
+#define DEVICE_NAME "ESP32" //DEVICE_NUMBER
 
 //GPIO pins for our light control
 // Note: These are not physical pin numbers, these are GPIO pin numbers. Example: r1Pin is set to GPIO23, which is physical pin #37
@@ -24,7 +24,7 @@ class BLESerial: public Stream
         BLESerial(void);
         ~BLESerial(void);
 
-        bool begin(char* localName="IoT-Bus UART Service");
+        bool begin(char* localName="ESP32");
         int available(void);
         int peek(void);
         bool connected(void);
@@ -117,19 +117,21 @@ bool BLESerial::begin(char* localName)
     // Create a BLE Characteristic
     pTxCharacteristic = pService->createCharacteristic(
                                             CHARACTERISTIC_UUID_TX,
+                                            BLECharacteristic::PROPERTY_READ | 
                                             BLECharacteristic::PROPERTY_NOTIFY
+
                                         );
     if (pTxCharacteristic == nullptr)
         return false;                    
     pTxCharacteristic->addDescriptor(new BLE2902());
 
     BLECharacteristic * pRxCharacteristic = pService->createCharacteristic(
-                                                CHARACTERISTIC_UUID_RX,
-                                                BLECharacteristic::PROPERTY_WRITE
+                                                  CHARACTERISTIC_UUID_RX,
+                                                  BLECharacteristic::PROPERTY_WRITE
                                             );
     if (pRxCharacteristic == nullptr)
         return false; 
-    //pRxCharacteristic->addDescriptor(new BLE2902());
+    pRxCharacteristic->addDescriptor(new BLE2902());
 
     BLESerialCharacteristicCallbacks* bleSerialCharacteristicCallbacks =  new BLESerialCharacteristicCallbacks(); 
     bleSerialCharacteristicCallbacks->bleSerial = this;  
@@ -243,12 +245,17 @@ void loop() {
       message = "";
     }
   }
+  bool connected = bt.connected();
+  
+  if (connected)
+  {
     // Every 5000 milliseconds (5 seconds), send a message
-  if (millis() - counter > 5000) {
-    counter = millis();
-    const char* message = "{\"to\":\"cse-in\",\"op\":2,\"rqi\":\"Hi from the ESP32SiP\",\"rvi\":\"3\",\"fr\":\"CAdmin\"}";
-    bt.write((uint8_t*)message, strlen(message));
-    Serial.print("Sent message: ");
-    Serial.println(message);
+    if (millis() - counter > 5000) {
+      counter = millis();
+      const char* message = "Ping";
+      bt.write((uint8_t*)message, strlen(message));
+      Serial.print("Sent message: ");
+      Serial.println(message);
+    }
   }
 }
