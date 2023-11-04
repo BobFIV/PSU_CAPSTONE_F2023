@@ -1,7 +1,11 @@
-.. _lte_sensor_gateway:
 
-nRF9160: LTE Sensor Gateway
+nRF9160: LTE (MQTT) to BLE gateway
 ###########################
+
+
+Requirements
+************
+MUST BUILD USING BOARD VERSION.
 
 .. contents::
    :local:
