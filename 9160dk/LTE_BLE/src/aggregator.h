@@ -59,6 +59,19 @@ struct downlink_data_packet {				//This is the data structure that is used to st
 	uint8_t data[ENTRY_MAX_SIZE];
 };
 
+// new struct for firmware update downlink
+struct firmware_update_packet_t{
+    char version[8];            // Assuming max version string length is 7 (e.g., "1.0.2") + null terminator
+    enum ble_destination destination;       // "esp32" can fit easily within this, with some room to spare
+    uint32_t chunk;             // Suitable for a large number of chunks
+    uint32_t total_chunks;      // Same as above
+    uint8_t data[ENTRY_MAX_SIZE];         // Adjust this size based on your expected max data length after decoding from Base64
+    size_t data_length;         // To keep track of the actual length of decoded data
+    char checksum[65];          // SHA-256 results in a 64-character hexadecimal number + null terminator
+};
+
+
+
 
 
 int aggregator_init(void);
@@ -75,4 +88,8 @@ void aggregator_clear(void);
 
 int aggregator_element_count_get(void);
 
+// new function for firmware update downlink
+int fdownlink_aggregator_put(struct firmware_update_packet_t data);
+
+int fdownlink_aggregator_get(struct firmware_update_packet_t *data);
 #endif /* _AGGREGATOR_H_ */

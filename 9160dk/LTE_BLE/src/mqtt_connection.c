@@ -210,7 +210,51 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 			}
 			else
 			{
-				LOG_ERR("Failed to extract rqi");
+				struct firmware_update_packet_t packet;	
+				//assume we are only use esp32 only right now
+				packet.destination = DESTINATION_ESP32;
+				// extract values from json_payload
+				cJSON *version = cJSON_GetObjectItem(json_payload, "version");
+    			cJSON *device_type = cJSON_GetObjectItem(json_payload, "device_type");
+    			cJSON *chunk = cJSON_GetObjectItem(json_payload, "chunk");
+    			cJSON *total_chunks = cJSON_GetObjectItem(json_payload, "total_chunks");
+				cJSON *data_length = cJSON_GetObjectItem(json_payload, "data_length");
+    			cJSON *data = cJSON_GetObjectItem(json_payload, "data");
+    			cJSON *checksum = cJSON_GetObjectItem(json_payload, "checksum");
+				//packet.version = version->valueint;
+				//packet.chunk = chunk->valueint;
+				//packet.total_chunks = total_chunks->valueint;
+				//packet.data_length = data_length->valueint;
+				//packet.checksum = checksum->valueint;
+				/*
+				if (version) {
+					strncpy(packet.version, version->valuestring, sizeof(packet.version) - 1);
+				}
+				if (checksum) {
+					strncpy(packet.checksum, checksum->valuestring, sizeof(packet.checksum) - 1);
+				}
+				*/
+
+				if (chunk) {
+					packet.chunk = chunk->valueint;
+				}
+				if (total_chunks) {
+					packet.total_chunks = total_chunks->valueint;
+				}
+				if (data_length) {
+					packet.data_length = data_length->valueint;
+				}
+				
+				
+
+
+				if (p->message.payload.len <= packet.data_length) {
+						memcpy(packet.data, payload_buf, p->message.payload.len);
+						fdownlink_aggregator_put(packet);
+					} else {
+						LOG_ERR("Payload size exceeds data packet buffer size");
+					}
+				//LOG_ERR("Failed to extract rqi");
 			}
 
 			cJSON_Delete(json_payload);
