@@ -1,0 +1,13 @@
+# Target labels
+ tfm
+# Source files and their labels
+C:/nordicsemi/v2.4.1/zephyr/capstone/LTE_BLE/build/modules/trusted-firmware-m/CMakeFiles/tfm
+C:/nordicsemi/v2.4.1/zephyr/capstone/LTE_BLE/build/modules/trusted-firmware-m/CMakeFiles/tfm.rule
+C:/nordicsemi/v2.4.1/zephyr/capstone/LTE_BLE/build/modules/trusted-firmware-m/CMakeFiles/tfm-complete.rule
+C:/nordicsemi/v2.4.1/zephyr/capstone/LTE_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-build.rule
+C:/nordicsemi/v2.4.1/zephyr/capstone/LTE_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-configure.rule
+C:/nordicsemi/v2.4.1/zephyr/capstone/LTE_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-download.rule
+C:/nordicsemi/v2.4.1/zephyr/capstone/LTE_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-install.rule
+C:/nordicsemi/v2.4.1/zephyr/capstone/LTE_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-mkdir.rule
+C:/nordicsemi/v2.4.1/zephyr/capstone/LTE_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-patch.rule
+C:/nordicsemi/v2.4.1/zephyr/capstone/LTE_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-update.rule

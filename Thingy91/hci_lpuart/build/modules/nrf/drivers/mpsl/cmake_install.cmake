@@ -1,8 +1,8 @@
-# Install script for directory: C:/ncs/v2.4.2/nrf/drivers/mpsl
+# Install script for directory: C:/nordicsemi/v2.4.1/nrf/drivers/mpsl
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files/Zephyr-Kernel")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/Zephyr-Kernel")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,11 +34,11 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/ncs/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump.exe")
+  set(CMAKE_OBJDUMP "C:/nordicsemi/toolchains/31f4403e35/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/yuchi/Desktop/PSU_CAPSTONE_F2023-main/Thingy91/hci_lpuart/build/modules/nrf/drivers/mpsl/clock_control/cmake_install.cmake")
+  include("C:/nordicsemi/v2.4.1/zephyr/capstone/hci_lpuart/build/modules/nrf/drivers/mpsl/clock_control/cmake_install.cmake")
 endif()
 
