@@ -17,7 +17,12 @@ int ble_init(void);
 #define BT_UUID_ESP32_SERVICE \
     BT_UUID_DECLARE_128(BT_UUID_ESP32_SERVICE_VAL)
 
-
+#define CHUNK_SIZE 20  // 20B
+struct ChunkData {
+    int current_chunk;
+    int total_chunks;
+    uint8_t data[CHUNK_SIZE];
+};
 struct bt_conn* get_conn_from_destination(enum ble_destination destination);
 
 int ble_transmit(struct bt_conn* conn, uint8_t* data, size_t length);
