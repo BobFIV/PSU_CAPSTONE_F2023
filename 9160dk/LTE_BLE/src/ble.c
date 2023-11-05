@@ -35,9 +35,9 @@ K_SEM_DEFINE(nus_write_sem, 0, 1);
 
 
 LOG_MODULE_DECLARE(lte_ble_gw);
-
+//#define BT_UUID_NUS_SERVICE BT_UUID_DECLARE_128(BT_UUID_128_ENCODE(0x00000001, 0x710e, 0x4a5b, 0x8d75, 0x3e5b444bc3cf))
 #define BT_UUID_NUS_SERVICE BT_UUID_DECLARE_128(BT_UUID_128_ENCODE(0x6E400001, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E))
-
+/*
 #define BT_UUID_ESP32_RX_VAL \
     BT_UUID_128_ENCODE(0x6E400002, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
 #define BT_UUID_ESP32_RX \
@@ -47,25 +47,23 @@ LOG_MODULE_DECLARE(lte_ble_gw);
     BT_UUID_128_ENCODE(0x6E400003, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
 #define BT_UUID_ESP32_TX \
     BT_UUID_DECLARE_128(BT_UUID_ESP32_TX_VAL)
-
-//rpi service defines
-
+*/
+/*
 #define BT_UUID_rPI_SERVICE_VAL \
     BT_UUID_128_ENCODE(0x00000001, 0x710e, 0x4a5b, 0x8d75, 0x3e5b444bc3cf)
-
 #define BT_UUID_rPI_SERVICE \
-    BT_UUID_DECLARE_128(BT_UUID_rPI_SERVICE_VAL)
+    BT_UUID_DECLARE_128(BT_UUID_rPI__SERVICE_VAL)
 
 #define BT_UUID_rPI_RX_VAL \
     BT_UUID_128_ENCODE(0x00000002, 0x710e, 0x4a5b, 0x8d75, 0x3e5b444bc3cf)
 #define BT_UUID_rPI_RX \
-    BT_UUID_DECLARE_128(BT_UUID_rPI_RX_VAL)
-
+    BT_UUID_DECLARE_128(BT_UUID_rPI__RX_VAL)
 
 #define BT_UUID_rPI_TX_VAL \
     BT_UUID_128_ENCODE(0x00000003, 0x710e, 0x4a5b, 0x8d75, 0x3e5b444bc3cf)
 #define BT_UUID_rPI_TX \
-    BT_UUID_DECLARE_128(BT_UUID_rPI_TX_VAL)
+    BT_UUID_DECLARE_128(BT_UUID_rPI__TX_VAL)
+*/
 
 #define MAX_CONNECTED_DEVICES 5
 
@@ -129,6 +127,26 @@ static void remove_connection(struct bt_conn *conn) {
     }
 }
 */
+// seperate data in ChunkData struct;
+void ble_send_packet(const char* buffer, int size){
+     if (buffer == NULL || size == 0) {
+        LOG_ERR("Invalid arguments"); // Error: Invalid arguments
+    }
+    int totalchunk = size/CHUNK_SIZE;
+    
+    struct ChunkData* data_chunks = (struct ChunkData*)malloc(totalchunk * CHUNK_SIZE);
+    // Copy data into chunks
+    int index= 0;
+    for(int i = 0; i < totalchunk; i++){
+        data_chunks[i].current_chunk = i;
+        // data_chunks[i].total_chunks = totalchunk;
+        memcpy(data_chunks[i].data, buffer + index, CHUNK_SIZE - sizeof(data_chunks[i]));
+        index+=(CHUNK_SIZE-sizeof(data_chunks[i]));
+        //sending data_chunks[i]   uncomplete
+
+    }
+}
+
 static void ble_data_sent(struct bt_nus_client *nus, uint8_t err,
 					const uint8_t *const data, uint16_t len)
 {
