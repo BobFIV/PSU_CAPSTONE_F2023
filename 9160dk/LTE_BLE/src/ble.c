@@ -128,6 +128,7 @@ static void remove_connection(struct bt_conn *conn) {
 }
 */
 // seperate data in ChunkData struct;
+/*
 void ble_send_packet(const char* buffer, int size){
      if (buffer == NULL || size == 0) {
         LOG_ERR("Invalid arguments"); // Error: Invalid arguments
@@ -140,13 +141,13 @@ void ble_send_packet(const char* buffer, int size){
     for(int i = 0; i < totalchunk; i++){
         data_chunks[i].current_chunk = i;
         // data_chunks[i].total_chunks = totalchunk;
-        memcpy(data_chunks[i].data, buffer + index, CHUNK_SIZE - sizeof(data_chunks[i]));
+        memcpy(data_chunks[i].data, buffer + i*CHUNK_SIZE, CHUNK_SIZE - sizeof(data_chunks[i]));
         index+=(CHUNK_SIZE-sizeof(data_chunks[i]));
         //sending data_chunks[i]   uncomplete
 
     }
 }
-
+*/
 static void ble_data_sent(struct bt_nus_client *nus, uint8_t err,
 					const uint8_t *const data, uint16_t len)
 {
