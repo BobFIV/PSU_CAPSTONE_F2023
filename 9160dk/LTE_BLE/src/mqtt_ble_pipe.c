@@ -42,6 +42,28 @@ size_t serialize_uplink_data_packet(const struct uplink_data_packet *packet, uin
     return serialized_length;
 }
 
+/*
+size_t serialize_uplink_data_packet(const struct uplink_data_packet *packet, uint8_t *buffer, size_t buffer_size)
+{
+    if (!packet || !buffer) {
+        return 0;
+    }
+
+    size_t serialized_length = 0;
+
+    cJSON *jsonObject = cJSON_CreateObject();
+    cJSON_AddNumberToObject(jsonObject, "type", packet->type);
+    cJSON_AddStringToObject(jsonObject, "data", packet->data);
+
+    char *jsonString = cJSON_PrintUnformatted(jsonObject);
+    cJSON_Delete(jsonObject);
+
+    serialized_length = snprintf((char *)buffer, buffer_size, "%s", jsonString);
+    free(jsonString);
+
+    return serialized_length;
+}
+*/
 void publish_aggregated_data(struct k_work *work)
 {
     ARG_UNUSED(work);
@@ -62,10 +84,6 @@ void publish_aggregated_data(struct k_work *work)
     cJSON *rvi = cJSON_GetObjectItem(jsonObject, "rvi");
     cJSON *ty = cJSON_GetObjectItem(jsonObject, "ty");
     cJSON *rcn = cJSON_GetObjectItem(jsonObject, "rcn");
-
-
-
-
 
 
 
