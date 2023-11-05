@@ -10,6 +10,7 @@
 #include "ble.h"
 #include "mqtt_ble_pipe.h"
 #include "main.h"
+#include "cJSON.h"
 
 LOG_MODULE_DECLARE(lte_ble_gw);
 
@@ -49,6 +50,24 @@ void publish_aggregated_data(struct k_work *work)
     struct uplink_data_packet data_packet;
     uint8_t serialized_data[SERIALIZED_DATA_MAX_SIZE];
     size_t serialized_length;
+    const char *jsonString = "{\"op\": 2, \"to\": \"cse-in/NRFParent\", \"fr\": \"CNRFParent\", \"rqi\": \"123\", \"rvi\": \"3\", \"ty\": 4, \"rcn\": 8}";
+    cJSON *jsonObject = cJSON_Parse(jsonString);
+    if (jsonObject == NULL) {
+        LOG_ERR("Error parsing JSON\n");
+    }
+    cJSON *op = cJSON_GetObjectItem(jsonObject, "op");
+    cJSON *to = cJSON_GetObjectItem(jsonObject, "to");
+    cJSON *fr = cJSON_GetObjectItem(jsonObject, "fr");
+    cJSON *rqi = cJSON_GetObjectItem(jsonObject, "rqi");
+    cJSON *rvi = cJSON_GetObjectItem(jsonObject, "rvi");
+    cJSON *ty = cJSON_GetObjectItem(jsonObject, "ty");
+    cJSON *rcn = cJSON_GetObjectItem(jsonObject, "rcn");
+
+
+
+
+
+
 
     while (uplink_aggregator_get(&data_packet) == 0) {
         //Serialize the data packet
@@ -57,13 +76,15 @@ void publish_aggregated_data(struct k_work *work)
             LOG_ERR("Failed to serialize data packet");
             continue;
         }
-
+        
         //Publish the data packet
         if (data_publish(&client, MQTT_QOS_1_AT_LEAST_ONCE, serialized_data, serialized_length) != 0) {
             LOG_ERR("Failed to publish data");
         }
     }
-    k_work_reschedule(dwork, K_MSEC(100));  // Corrected this line
+    k_work_reschedule(dwork, K_MSEC(100));  //Reschedule the work after 100 milliseconds
+    cJSON_Delete(jsonObject);
+
 }
 
 
