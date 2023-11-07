@@ -200,8 +200,8 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 					//packet.source = determine_packet_destination(rqi->valuestring); To-Do: Implement in operation smart IPE once Chang gets rPi working.
 					packet.destination = DESTINATION_ESP32;
 					memset(packet.version, '\0', sizeof(packet.version));
-					packet.chunk = NULL;
-					packet.total_chunks = NULL;
+					packet.chunk = 0;
+					packet.total_chunks = 0;
 					memset(packet.checksum, '\0', sizeof(packet.checksum));
 					if (p->message.payload.len <= sizeof(packet.data)) {
 						memcpy(packet.data, payload_buf, p->message.payload.len);
@@ -216,7 +216,7 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 			{
 				struct downlink_data_packet packet;	
 				//assume we are only use esp32 only right now
-				packet.length = NULL;
+				packet.length = 0;
 				packet.destination = DESTINATION_ESP32;
 				packet.type = downlink_TEXT;
 				// extract values from json_payload
@@ -256,7 +256,7 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 
 				if (p->message.payload.len <= packet.data_length) {
 						memcpy(packet.data, payload_buf, p->message.payload.len);
-						fdownlink_aggregator_put(packet);
+						downlink_aggregator_put(packet);
 					} else {
 						LOG_ERR("Payload size exceeds data packet buffer size");
 					}
