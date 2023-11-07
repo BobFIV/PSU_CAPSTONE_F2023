@@ -199,6 +199,10 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 					packet.length = p->message.payload.len;
 					//packet.source = determine_packet_destination(rqi->valuestring); To-Do: Implement in operation smart IPE once Chang gets rPi working.
 					packet.destination = DESTINATION_ESP32;
+					memset(packet.version, '\0', sizeof(packet.version));
+					packet.chunk = NULL;
+					packet.total_chunks = NULL;
+					memset(packet.checksum, '\0', sizeof(packet.checksum));
 					if (p->message.payload.len <= sizeof(packet.data)) {
 						memcpy(packet.data, payload_buf, p->message.payload.len);
 						downlink_aggregator_put(packet);
@@ -210,9 +214,11 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 			}
 			else
 			{
-				struct firmware_update_packet_t packet;	
+				struct downlink_data_packet packet;	
 				//assume we are only use esp32 only right now
+				packet.length = NULL;
 				packet.destination = DESTINATION_ESP32;
+				packet.type = downlink_TEXT;
 				// extract values from json_payload
 				cJSON *version = cJSON_GetObjectItem(json_payload, "version");
     			cJSON *device_type = cJSON_GetObjectItem(json_payload, "device_type");
