@@ -57,8 +57,14 @@ struct downlink_data_packet {				//This is the data structure that is used to st
 	enum downlink_data_packet_type type;
 	enum ble_destination destination;
 	uint8_t data[ENTRY_MAX_SIZE];
+	
+	char version[8];            // Assuming max version string length is 7 (e.g., "1.0.2") + null terminator
+    uint32_t chunk;             // Suitable for a large number of chunks
+    uint32_t total_chunks;      // Same as above
+    size_t data_length;         // To keep track of the actual length of decoded data
+    char checksum[65]; 
 };
-
+/*
 // new struct for firmware update downlink
 struct firmware_update_packet_t{
     char version[8];            // Assuming max version string length is 7 (e.g., "1.0.2") + null terminator
@@ -69,7 +75,7 @@ struct firmware_update_packet_t{
     size_t data_length;         // To keep track of the actual length of decoded data
     char checksum[65];          // SHA-256 results in a 64-character hexadecimal number + null terminator
 };
-
+*/
 
 
 
@@ -87,9 +93,10 @@ int downlink_aggregator_get(struct downlink_data_packet *data);
 void aggregator_clear(void);
 
 int aggregator_element_count_get(void);
-
+/*
 // new function for firmware update downlink
 int fdownlink_aggregator_put(struct firmware_update_packet_t data);
 
 int fdownlink_aggregator_get(struct firmware_update_packet_t *data);
+*/
 #endif /* _AGGREGATOR_H_ */
