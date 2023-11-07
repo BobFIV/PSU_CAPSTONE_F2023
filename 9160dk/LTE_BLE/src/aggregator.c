@@ -37,7 +37,7 @@ struct downlink_fifo_entry {
 //newstruct for firmware:
 struct fdownlink_fifo_entry {
 	void *fifo_reserved;
-	uint8_t data[sizeof(struct firmware_update_packet_t)];
+	uint8_t data[sizeof(struct downlink_data_packet)];
 };
 
 int uplink_aggregator_put(struct uplink_data_packet in_data)
@@ -171,7 +171,7 @@ exit:
 	irq_unlock(lock);
 	return err;
 }
-
+/*
 //new downlink put function for new struct:
 int fdownlink_aggregator_get(struct firmware_update_packet_t *out_data)
 {
@@ -197,7 +197,7 @@ int fdownlink_aggregator_get(struct firmware_update_packet_t *out_data)
 
 
 	memcpy(out_data, ((struct fdownlink_fifo_entry *)fifo_data)->data,
-	       sizeof(struct firmware_update_packet_t));
+	       sizeof(struct downlink_data_packet));
 	LOG_INF ("downlink_aggregator_get: %s", out_data->data);
 	k_free(fifo_data);
 	downlink_entry_count--;
@@ -207,7 +207,7 @@ exit:
 	return err;
 }
 
-int fdownlink_aggregator_put(struct firmware_update_packet_t in_data)
+int fdownlink_aggregator_put(struct downlink_data_packet in_data)
 {
 	struct downlink_fifo_entry *fifo_data = NULL;
 	uint32_t  lock = irq_lock();
@@ -230,7 +230,7 @@ int fdownlink_aggregator_put(struct firmware_update_packet_t in_data)
 		goto exit;
 	}
 	
-	memcpy(fifo_data->data, &in_data, sizeof(struct firmware_update_packet_t));
+	memcpy(fifo_data->data, &in_data, sizeof(struct downlink_data_packet));
 	LOG_INF("downlink_aggregator_put: %s", in_data.data);
 	k_fifo_put(&downlink_aggregator_fifo, fifo_data);
 	downlink_entry_count++;
@@ -239,6 +239,7 @@ exit:
 	irq_unlock(lock);
 	return err;
 }
+*/
 
 void aggregator_clear(void)
 {
