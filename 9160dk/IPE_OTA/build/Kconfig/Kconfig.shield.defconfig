@@ -1,0 +1,2 @@
+osource "c:/users/yuchi/downloads/9160release/boards/shields/*/Kconfig.defconfig"
+osource "C:/nordicsemi/v2.4.1/nrf/boards/shields/*/Kconfig.defconfig"

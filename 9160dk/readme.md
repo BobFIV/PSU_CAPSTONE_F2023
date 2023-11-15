@@ -1,12 +1,10 @@
-# nrf9160-dk firmware
-## Function
-Currently, it runs both MQTT connection and a sole bluetooth connection to the ESP32.  
-## How to build:  
-Set SW10 to flash to the nRF91.
-Change the UUID in the bluetooth.c folder to change the device to connect to.
-Build and flash the lte_ble_gateway program to the 9160.  
-Set SW10 to flash to the nRF52
-Build and flash the hci_lpuart to the nrf52  
-#To-Do:  
-Set LED blinking  
-Improve Documentation 
+.. IPE-PROGRAM:
+
+nRF9160: IPE PROGRAM
+####################
+Pennsylvania State University Fall 2023 Capstone Project
+
+Sponsored by Exacta Global Smart Solutions
+
+Firmware for the Nordic Semicondutor nRF9160 Development Kit. See the readme in each program for deeper explanation.
+
