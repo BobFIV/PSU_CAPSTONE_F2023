@@ -2,6 +2,7 @@ Pennsylvania State University CAPSTONE FALL 2023
 ################################################
 
 Sponsored by `Exacta Global Smart Solutions <https://www.exactagss.com/>`_
+Exacta GSS are a leading-edge consulting firm for oneM2M and standards-sbaed IoT Solutions.
 
 .. contents::
    :local:
@@ -12,8 +13,9 @@ Implementing Device Management through cellular IoT following the oneM2M standar
 Overview
 *********
 This repository contains code and instructions for implementing cellular-based device management on the ESP32 and the Raspberry Pi through the nrF9160-dk.
-
-
+.. image:: images/connectivity.png
+   :alt: connectivity map for whole project.
+   :align: center
 
 Components
 **********
