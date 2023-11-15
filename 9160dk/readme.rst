@@ -1,4 +1,4 @@
-.. IPE-PROGRAM:
+.. 9160firmware:
 
 nRF9160: IPE PROGRAM
 ####################
