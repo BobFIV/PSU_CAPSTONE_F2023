@@ -13,6 +13,7 @@ Implementing Device Management through cellular IoT following the oneM2M standar
 Overview
 *********
 This repository contains code and instructions for implementing cellular-based device management on the ESP32 and the Raspberry Pi through the nrF9160-dk.
+
 .. image:: images/connectivity.png
    :alt: connectivity map for whole project.
    :align: center
