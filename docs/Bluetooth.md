@@ -1,6 +1,8 @@
 # Bluetooth Low-Energy Communication
 All local communication is done using Bluetooth Low-Energy.
 
+![Bluetooth Image](../images/Bluetooth.png)
+
 ## Headers
 All messages sent to the 9160 has a one-byte headers for processing. They are the following:
 - 0x01: Firmware Error. Sent if the wrong chunk is received or the checksum fails. This message is forwarded by the 9160DK to MQTT and the appropriate update topic to restart packet sending.
