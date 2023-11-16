@@ -63,5 +63,5 @@ Importantly, the expected chunk number for the update is set to zero.
   
 Each packet is checked with the the expected chunk number on the 9160. the 9160 will then decode and re-calculate the checksum. If both of these checks pass, then the expected chunk number is incremented and the packet is forwarded over BLE.  
 If either of these checks fail, an error message is published over MQTT to the corresponding topic.  
-For more detail, see the [readme on 9160DK](../../9160dk/IPE_OTA/readme.md).
+For more detail, see the [9160 firmware Update doc](9160Update.md).
 ## Confirmation:
