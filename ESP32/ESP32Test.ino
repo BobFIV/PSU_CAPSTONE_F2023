@@ -9,9 +9,7 @@
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
-
-//#define DEVICE_NUMBER "1"
-#define DEVICE_NAME "ESP32" //DEVICE_NUMBER
+#define DEVICE_NAME "ESP32" 
 
 //GPIO pins for our light control
 // Note: These are not physical pin numbers, these are GPIO pin numbers. Example: r1Pin is set to GPIO23, which is physical pin #37
