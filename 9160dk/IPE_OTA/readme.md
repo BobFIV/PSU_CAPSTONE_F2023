@@ -3,8 +3,6 @@ Pennsylvania State University Fall 2023 Capstone Project
 
 Sponsored by Exacta Global Smart Solutions
 
-To-Do: Fix LEDs. Implement multi-device support. Finish oneM2M message compliance.
-
 This program runs a oneM2M compliant IPE program, communicating to the cloud via MQTT over cellular.
 
 The program also runs a Bluetooth® Low Energy central program to manage devices on the Raspberry Pi and ESP32.
