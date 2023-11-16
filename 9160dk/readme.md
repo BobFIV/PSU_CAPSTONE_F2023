@@ -3,4 +3,6 @@ Pennsylvania State University Fall 2023 Capstone Project
 
 Sponsored by Exacta Global Smart Solutions
 
-Firmware for the Nordic Semicondutor nRF9160 Development Kit. See the readme in each program for deeper explanation.
+Firmware for the Nordic Semicondutor nRF9160 Development Kit. See the readme in each program for deeper explanation here:
+- [9160](9160dk/IPE_OTA/readme.md)
+- [52840](9160dk/hci_lpuart/readme.rst) 
