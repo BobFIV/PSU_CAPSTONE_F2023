@@ -164,7 +164,20 @@ void transmit_aggregated_data(struct k_work *work) {
         if (json_message == NULL) {
             continue;
         }
+        if (packet.destination == DESTINATION_ESP32)
+        {
 
+        }
+        else if (packet.destination == DESTINATION_RaspberryPi)
+        {
+
+        }
+        else
+        {
+            LOG_ERR("Unknown destination");
+            free(json_message);
+            continue;
+        }
         struct bt_conn *target_conn = get_conn_from_destination(packet.destination); //currently unused, sets default_conn :) 
         if (target_conn) {
             ble_transmit(target_conn, (uint8_t *)json_message, strlen(json_message));

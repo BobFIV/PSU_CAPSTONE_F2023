@@ -43,34 +43,8 @@ LOG_MODULE_DECLARE(lte_ble_gw);
 #define TRAIN_LOCATION   0x05
 
 //#define BT_UUID_NUS_SERVICE BT_UUID_DECLARE_128(BT_UUID_128_ENCODE(0x00000001, 0x710e, 0x4a5b, 0x8d75, 0x3e5b444bc3cf))
-#define BT_UUID_NUS_SERVICE BT_UUID_DECLARE_128(BT_UUID_128_ENCODE(0x6E400001, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E))
-/*
-#define BT_UUID_ESP32_RX_VAL \
-    BT_UUID_128_ENCODE(0x6E400002, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
-#define BT_UUID_ESP32_RX \
-    BT_UUID_DECLARE_128(BT_UUID_ESP32_RX_VAL)
+//#define BT_UUID_NUS_SERVICE BT_UUID_DECLARE_128(BT_UUID_128_ENCODE(0x6E400001, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E))
 
-#define BT_UUID_ESP32_TX_VAL \
-    BT_UUID_128_ENCODE(0x6E400003, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
-#define BT_UUID_ESP32_TX \
-    BT_UUID_DECLARE_128(BT_UUID_ESP32_TX_VAL)
-*/
-/*
-#define BT_UUID_rPI_SERVICE_VAL \
-    BT_UUID_128_ENCODE(0x6E400001, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
-#define BT_UUID_rPI_SERVICE \
-    BT_UUID_DECLARE_128(BT_UUID_rPI__SERVICE_VAL)
-
-#define BT_UUID_rPI_RX_VAL \
-    BT_UUID_128_ENCODE(0x6E400002, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
-#define BT_UUID_rPI_RX \
-    BT_UUID_DECLARE_128(BT_UUID_rPI__RX_VAL)
-
-#define BT_UUID_rPI_TX_VAL \
-    BT_UUID_128_ENCODE(0x6E400003, 0xB5A3, 0xF393, 0xE0A9, 0xE50E24DCCA9E)
-#define BT_UUID_rPI_TX \
-    BT_UUID_DECLARE_128(BT_UUID_rPI__TX_VAL)
-*/
 
 #define MAX_CONNECTED_DEVICES 5
 
@@ -134,22 +108,16 @@ static void remove_connection(struct bt_conn *conn) {
     }
 }
 */
-static void ble_data_sent(struct bt_nus_client *nus, uint8_t err,
-					const uint8_t *const data, uint16_t len)
+static void ble_data_sent(uint8_t err, const uint8_t *const data, uint16_t len)
 {
-	LOG_INF("Data sent via NUS");
-	ARG_UNUSED(nus);
-
-	//free buffer after send?
 
 	k_sem_give(&nus_write_sem);
 
 	if (err) {
 		LOG_WRN("ATT error code: 0x%02X", err);
 	}
-
-	
 }
+
 
 
 int ble_transmit(struct bt_conn *conn, uint8_t *data, size_t length) {
@@ -180,58 +148,19 @@ static void discovery_completed(struct bt_gatt_dm *dm, void *context)
 	bt_nus_handles_assign(dm, nus);
 	bt_nus_subscribe_receive(nus);
 
-	
 
-
-    /*
-	struct bt_conn *conn = bt_gatt_dm_conn_get(dm);
-	struct bt_nus_client *nus = (struct bt_nus_client *)context;
-	//setup_connection(conn, nus);  // Add the connection to the list and initialize the NUS client for this connection
-    LOG_INF("Service discovery completed");
-
-    // Print discovered attributes (for debugging)
-    bt_gatt_dm_data_print(dm);
-
-    // Assign handles using the NUS client library function
-    if (bt_nus_handles_assign(dm, nus) < 0) {
-        LOG_ERR("Failed to assign handles");
-        goto release;
-    }
-
-    // Subscribe to the RX characteristic using the NUS client library function
-    if (bt_nus_subscribe_receive(nus) < 0) {
-        LOG_ERR("Failed to subscribe to RX characteristic");
-        goto release;
-    }
+    bt_gatt_dm_data_release(dm);
 
     
-    for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
-        if (devices_list[i].conn == conn) {
-
-            char *device_name = get_device_name(conn);
-            if (device_name) {
-                // Now you can use the device_name to determine the device type
-                if (strncmp(device_name, "ESP32", 6) == 0) {
-                    LOG_INF("Device is ESP32");
-                    devices_list[i].destination = DESTINATION_ESP32;
-                } else if (strncmp(device_name, "RaspberryPi-", 12) == 0) {
-                    LOG_INF("Device is Raspberry Pi");
-                    devices_list[i].destination = DESTINATION_RaspberryPi;
-                } else {
-                    LOG_INF("Device is Unknown. Setting it to ESP32 for now.");
-                    devices_list[i].destination = DESTINATION_ESP32;
-                }
-                LOG_INF("Device name: %s", device_name);
-                LOG_HEXDUMP_INF(device_name, 6, "Device name:");
-            }
-
-            break;
-        }
+    //restart scanning
+    int err = bt_scan_start(BT_SCAN_TYPE_SCAN_ACTIVE);
+    if (err) {
+        LOG_ERR("Scanning failed to start, err %d", err);
+        return;
+    } else {
+        LOG_INF("Scanning started again after discovery.");
     }
-    */
 
-//release:
-    bt_gatt_dm_data_release(dm);
 }
 
 
