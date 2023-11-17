@@ -51,7 +51,7 @@ Another layer of connectivity is Bluetooth® Low-Energy. The 9160DK connects mul
 
 To keep with the topic of device management, the 9160 also has the ability to run a full firmware over the air (FOTA) update on itself for improved functionality. This is done using MCUBoot.
 
-For more info, please see the readme in the 9160-DK directory.
+For more detail, see the [readme on 9160DK](/9160dk/IPE_OTA/readme.md).
 
 ### AI-Thinker ESP32-CAM
 
@@ -62,6 +62,7 @@ For demo purposes, the following programs run on the board:
 - Upgrade firmware from BLE
 - Take image and transmit over BLE
 
+For more detail, see the [readme on ESP32](/ESP32/readme.md).
 ### Raspberry Pi 4B
 
 The Raspberry Pi 4B is a powerful single-board computer, running a BCM2711 SoC. The Raspberry Pi 4B also acts as an end-device on our network and is not oneM2M compliant. It hosts software onboard to accept software updates to it, but not a full image firmware upgrade.
@@ -73,6 +74,7 @@ For demo purposes, four programs run on the board:
 - Reassemble image (photograph) from Bluetooth and show to external monitor
 - Image recognition (add GitHub link)
 
+For more detail, see the [readme on Raspberry Pi](/RPi/readme.md).
 ### Django WebApp
 
 The Django WebApp is the user's point of contact with the system. It has the following capabilities:
