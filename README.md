@@ -88,7 +88,7 @@ The [Eclipse Mosquitto MQTT Broker](https://mosquitto.org/) is an open source MQ
 
 ### ACME oneM2M CSE
 
-[ACME oneM2M CSE](https://github.com/ankraft/ACME-oneM2M-CSE) is an open source CSE middleware for education, developed and maintained by Andreas Kraft.
+[ACME oneM2M CSE](https://github.com/ankraft/ACME-oneM2M-CSE) is an open source CSE middleware for education, developed and maintained by Andreas Kraft. In our network, the CSE is deployed on another AWS EC2 instance.
 
 ## Acknowledgements
 
@@ -97,4 +97,4 @@ Thank you to [Exacta Global Smart Solutions](https://www.exactagss.com/) for the
 
 Thank you to Dave Gamble and other contributors for the cJSON library, used extensively in MQTT communications from the 9160 in our project.
 
-Thank you to Andreas Kraft and the other contributors to the ACME CSE for making this project possible.
+Thank you to Andreas Kraft and the other contributors to the ACME CSE. 
