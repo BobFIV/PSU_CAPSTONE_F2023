@@ -41,6 +41,8 @@ Update Error:
 {
     "Firmware Error": "Packet Lost: 32"
 }
+```
+```
 Note: This is the message seen on Django.
 The ESP32 or Raspberry Pi sends the message "Packet Lost: 32" over BLE to the 9160,
 which the 9160 will wrap the string the shown JSON format.
