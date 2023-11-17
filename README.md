@@ -1,8 +1,8 @@
-# Pennsylvania State University CAPSTONE FALL 2023
+# Cellular Device Management following the oneM2M protocol
+Pennsylvania State University CMPEN482W CAPSTONE FALL 2023 Code Repository.
 
-Sponsored by [Exacta Global Smart Solutions](https://www.exactagss.com/)
+Sponsored by [Exacta Global Smart Solutions](https://www.exactagss.com/), a leading-edge consulting firm for oneM2M and standards-based IoT Solutions based in the Greater Philadelphia Area.
 
-Exacta GSS are a leading-edge consulting firm for oneM2M and standards-based IoT Solutions.
 ## Documentation 
 - [oneM2M Protocol](docs/oneM2M.md) 
 - Device Firmware 
@@ -92,7 +92,8 @@ The [Eclipse Mosquitto MQTT Broker](https://mosquitto.org/) is an open source MQ
 
 ## Acknowledgements
 
-Thank you to Exacta Global Smart Solutions for sponsoring and guiding us through the project. Without their expertise on oneM2M, and IoT solutions this project would not have been possible.
+Thank you to [Exacta Global Smart Solutions](https://www.exactagss.com/) for their generous sponsorship and for guiding us through the project. Without their expertise on oneM2M and IoT solutions this project would not have been possible.  
+
 
 Thank you to Dave Gamble and other contributors for the cJSON library, used extensively in MQTT communications from the 9160 in our project.
 
