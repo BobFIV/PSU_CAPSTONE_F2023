@@ -1,4 +1,4 @@
-# Cellular Device Management following the oneM2M protocol
+# oneM2M Cellular Device Managment using the nRF9160DK as an IPE
 Pennsylvania State University CMPEN482W CAPSTONE FALL 2023 Code Repository.
 
 Sponsored by [Exacta Global Smart Solutions](https://www.exactagss.com/), a leading-edge consulting firm for oneM2M and standards-based IoT Solutions based in the Greater Philadelphia Area.
