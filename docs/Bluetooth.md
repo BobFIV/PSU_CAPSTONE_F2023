@@ -5,7 +5,7 @@ The peripherals advertise their data while the central scans for it. Communicati
 
 ![Bluetooth Image](../images/Bluetooth.png)
 
-Nordic UART Service (NUS) emulates UART over BLE. This program allows multiple connections to the same hub board.
+Nordic UART Service (NUS) emulates UART over BLE. This program builds upon the UART Central Sample to allow multiple connections to the same hub board. Based partially on the [Multi-NUS](https://github.com/NordicMatt/multi-NUS/tree/master) program to manage multiple NUS connections. 
 
 ## Headers
 In order to sort the messages coming to the 9160DK, a header system was implemented. The one-byte headers for processing are the following:
@@ -16,7 +16,6 @@ In order to sort the messages coming to the 9160DK, a header system was implemen
 - 0x05: Train Location. This is strictly Demo data. It will be sent to the 9160 and published to the Demo topic to keep the WebApp aware of the train location of fruits and vegetables.
 
 ## Code Breakdown
-Based partially on the [Multi-NUS](https://github.com/NordicMatt/multi-NUS/tree/master) program to manage multiple NUS connections.  
 All code is located in [ble.c](../9160dk) to-do: fix link once full release is out.
 ### Initialization
 At initialization, the table mapping device names to connection indexes are cleared to zero. The ctx_lib is also initialized with ```BT_CONN_CTX_DEF(ctx_lib, sizeof(struct bt_nus_client), MAX_CONNECTED_DEVICES);```.
