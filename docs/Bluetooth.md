@@ -5,6 +5,8 @@ The peripherals advertise their data while the central scans for it. Communicati
 
 ![Bluetooth Image](../images/Bluetooth.png)
 
+Nordic UART Service (NUS) emulated UART over BLE.
+
 ## Headers
 In order to sort the messages coming to the 9160DK, a header system was implemented. The one-byte headers for processing are the following:
 - 0x01: Firmware Error. Sent if the wrong chunk is received or the checksum fails. This message is forwarded by the 9160DK to MQTT and the appropriate update topic to restart packet sending.
@@ -15,6 +17,7 @@ In order to sort the messages coming to the 9160DK, a header system was implemen
 
 ## Logic
 Based partially on the [Multi-NUS](https://github.com/NordicMatt/multi-NUS/tree/master) program to manage multiple NUS connections.  
+All code is located in [ble.c](../9160dk) to-do: fix link once full release is out.
 ### Initialization
 At initialization, the table mapping device names to connection indexes are cleared to zero. The ctx_lib is also initialized with ```BT_CONN_CTX_DEF(ctx_lib, sizeof(struct bt_nus_client), MAX_CONNECTED_DEVICES);```.
 The following are done in this order:
