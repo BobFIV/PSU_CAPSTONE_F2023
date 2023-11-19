@@ -1,0 +1,13 @@
+# Target labels
+ tfm
+# Source files and their labels
+C:/ncs/v2.4.2/zephyr/capstone/IPE_OTA_BLE/build/modules/trusted-firmware-m/CMakeFiles/tfm
+C:/ncs/v2.4.2/zephyr/capstone/IPE_OTA_BLE/build/modules/trusted-firmware-m/CMakeFiles/tfm.rule
+C:/ncs/v2.4.2/zephyr/capstone/IPE_OTA_BLE/build/modules/trusted-firmware-m/CMakeFiles/tfm-complete.rule
+C:/ncs/v2.4.2/zephyr/capstone/IPE_OTA_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-build.rule
+C:/ncs/v2.4.2/zephyr/capstone/IPE_OTA_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-configure.rule
+C:/ncs/v2.4.2/zephyr/capstone/IPE_OTA_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-download.rule
+C:/ncs/v2.4.2/zephyr/capstone/IPE_OTA_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-install.rule
+C:/ncs/v2.4.2/zephyr/capstone/IPE_OTA_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-mkdir.rule
+C:/ncs/v2.4.2/zephyr/capstone/IPE_OTA_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-patch.rule
+C:/ncs/v2.4.2/zephyr/capstone/IPE_OTA_BLE/build/modules/trusted-firmware-m/tfm-prefix/src/tfm-stamp/tfm-update.rule
