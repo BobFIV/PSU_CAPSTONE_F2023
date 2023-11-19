@@ -6,6 +6,11 @@ The firmware update process for specific devices (Raspberry Pi, ESP32, and nRF91
 - [nRF 9160](9160Update.md)
 # Initialization:
 Initialization of the update is done completed following oneM2M. To learn more about oneM2M in our project, see the [oneM2M doc](oneM2M.md)
+When each board is turned on, it will send a CREATE request to the ACME CSE. An UPDATE request is then sent to the CSE to set the version number. In the case of the ESP32 and Raspberry Pi, since they are non-oneM2M devices, these messages are sent to the 9160 and correctly formatted, then sent to the CSE.
+
+Add view of CSE here.
+
+The nRF9160 is subscribed to the Django WebApp AE. Once the AE pushes an update for any of the boards, the nRF9160 will get a notification. Following this notification, an update request is published to the container to refresh the version of the device in the container. The Django WebApp, also subscribed to each device, will see the version and an update/revert option will now be available to the user. Pressing this update/revert option will then trigger the update to occur.
 
 # The Update:
 The maximum transfer unit, or MTU of our devices in a BLE network with the nRF9160DK is 247 Bytes. This means that although MQTT has a theoretical maximum package size of 256 MB, it is much less processing on the nRF9160DK to pre-chunk the packages down a maximum of 247 before sending.
@@ -86,3 +91,4 @@ Each packet is checked with the the expected chunk number on the 9160. the 9160 
 If either of these checks fail, an error message is published over MQTT to the corresponding topic.  
 For more detail, see the [9160 firmware Update doc](9160Update.md).
 ## Confirmation:
+After the board reboots, steps similar to initialization are taken. The 9160, seeing that the board is back from the update (either itself or the ESP32 and Raspberry Pi), will send a UPDATE request to update the firmware version in ACME. In the case of ESP32 and Raspberry Pi, a message containing the firmware version is sent to the 9160, which will use this data to update the CSE.
