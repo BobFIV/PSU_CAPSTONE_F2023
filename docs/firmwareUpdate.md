@@ -1,8 +1,11 @@
-# Firmware Update
+# Firmware Update Procedure
 Firmware updates are initialized and oversee by oneM2M, but the update itself follows a different protocol. The whole update process from initialization to completion is outlined in this document.  
-
+The firmware update process for specific devices (Raspberry Pi, ESP32, and nRF9160) are shown in their respective documents here:
+- [Raspberry Pi](RpiUpdate)
+- [ESP32](ESP32Update)
+- [nRF 9160](9160Update.md)
 # Initialization:
-Initialization of the update is done completed following oneM2M.
+Initialization of the update is done completed following oneM2M. To learn more about oneM2M in our project, see the [oneM2M doc](oneM2M.md)
 
 # The Update:
 The maximum transfer unit, or MTU of our devices in a BLE network with the nRF9160DK is 247 Bytes. This means that although MQTT has a theoretical maximum package size of 256 MB, it is much less processing on the nRF9160DK to pre-chunk the packages down a maximum of 247 before sending.
