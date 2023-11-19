@@ -6,15 +6,14 @@ Sponsored by [Exacta Global Smart Solutions](https://www.exactagss.com/), a lead
 ## Documentation 
 - [oneM2M Protocol](docs/oneM2M.md) 
 - Device Firmware 
-	- [9160DK](9160dk/readme.md) 
-	 - [ESP32](ESP32/readme.md) 
-	 - [Raspberry Pi](RPi/readme.md) 
+	- [Firmware on the 9160DK](9160dk/readme.md) 
+	 - [Firmware on the ESP32](ESP32/readme.md) 
+	 - [Software on the Raspberry Pi](RPi/readme.md) 
  - Firmware Update 
 	 - [Firmware Update Procedure](docs/firmwareUpdate.md) 
-	 - For Specific Devices: 
-		 - [9160DK](docs/9160Update.md) 
-		 - [ESP32](docs/ESP32Update.md) 
-		 - [Raspberry Pi](docs/RpiUpdate.md) 
+		 - [Updating the 9160DK](docs/9160Update.md) 
+		 - [Updating the ESP32](docs/ESP32Update.md) 
+		 - [Updating the Raspberry Pi](docs/RpiUpdate.md) 
  - [BLE Communication](docs/Bluetooth.md) 
  - [Final Demo](docs/demo.md)
 
