@@ -80,7 +80,7 @@ This function is called ONLY from mqtt_ble_pipe.c. The target string is calculat
 5. Transmit using bt_nus_client_send to the correct NUS.
 6. Release the context
 #### void ble_data_sent(struct bt_nus_client *nus, uint8_t err, const uint8_t *data, uint16_t len)
-gives back the semaphore.
+- gives back the semaphore.
 
 ### Receiving a message
 #### static uint8_t ble_data_received(struct bt_nus_client *nus, const uint8_t *data, uint16_t len)
