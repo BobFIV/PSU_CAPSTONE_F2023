@@ -81,7 +81,7 @@ gives back the semaphore.
 
 ### Receiving a message
 #### static uint8_t ble_data_received(struct bt_nus_client *nus, const uint8_t *data, uint16_t len)
-Checking for the one-byte header, the next course of action is determined.
+1. Checking for the one-byte header, the next course of action is determined.
 
 
 
