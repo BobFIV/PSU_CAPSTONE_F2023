@@ -24,12 +24,13 @@ The following are done in this order:
 4. Initialzes scan
    - Set parameters
    - Initalize the scan (The actual zephyr line)
-   - Set filters (initially set name to = ESP32)
+   - Set filters. Scan by device name, initially set name to ESP32.
    - Enable the scan
    - Set the work to switch the scan (Basically a 10 second timer)
 5. Start the scan (actual zephyr line to start)
+
 ### Connecting to a device
-#### Connected()
+#### static void connected(struct bt_conn *conn, uint8_t conn_err)
 1. Initialize a NUS client for the connection.
    - Create the initial nus client (set parameters for receive and send)
    - Initalize the nus client struct, allocate memory in the ctx_lib.
@@ -47,10 +48,28 @@ The following are done in this order:
 #### discovery_completed()
 1. Release the GATT data.
 2. Restart the scan.
-3. Determine the index of this connection in the ctx_lib, map the index with the name in a global table (device_maps).
+3. Determine the index of this connection in the ctx_lib, map the index with the name (using the currently scanning name) in a global table (device_maps).
 4. Send a ping message to the connected device.
+
+### Disconnecting from a device
+#### static void disconnected(struct bt_conn *conn, uint8_t reason)
+1. Free the connection from the ctx_lib.
+2. Unreference the connection.
+
+### Switching the device to scan for
+#### static void switch_device_name(struct k_work *work)
+1. Compare the currently scanning device name to "ESP32" or "RaspberryPi". Set a string new_name to the one it is not scanning for (i.e. if current target = ESP32, set new_name to RaspberryPi)
+2. strncpy the target name (overwrite it) with the new_name string.
+3. Stop the scan.
+4. Clear the filter.
+5. Add to the filter the new target name.
+6. Start the scan.
+7. Reschedule this function to execute again 10 seconds later, to swap to the other device.
+Potential improvements: Currently, no safeguards are in place from switching between devices during the discovery_completed() function. This could cause problems where a RaspberryPi is discovered 9 seconds into the scan and when discovery is complete, the scan can swap to the ESP32 and have the name incorrectly set.
+
 ### Sending a message
 #### ble_transmit(const char* target, uint8_t *data, uint16_t length)
+This function is called ONLY from mqtt_ble_pipe.c. The target string is calculated there based on the destination parameter from the aggregator.
 1. Takes the NUS transmit sempahore
 2. Using the "target" input, find the corresponding index from the device_map
 3. Using the index, get the corresponding context.
@@ -59,4 +78,10 @@ The following are done in this order:
 6. Release the context
 #### void ble_data_sent(struct bt_nus_client *nus, uint8_t err, const uint8_t *data, uint16_t len)
 gives back the semaphore.
+
+### Receiving a message
+#### static uint8_t ble_data_received(struct bt_nus_client *nus, const uint8_t *data, uint16_t len)
+Checking for the one-byte header, the next course of action is determined.
+
+
 
