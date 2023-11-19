@@ -1,4 +1,4 @@
-# oneM2M Cellular Device Managment using the nRF9160DK as an IPE
+# oneM2M Cellular Device Management using the nRF9160DK as an IPE
 Pennsylvania State University CMPEN482W CAPSTONE FALL 2023 Code Repository.
 
 Sponsored by [Exacta Global Smart Solutions](https://www.exactagss.com/), a leading-edge consulting firm for oneM2M and standards-based IoT Solutions based in the Greater Philadelphia Area.
@@ -20,7 +20,7 @@ Sponsored by [Exacta Global Smart Solutions](https://www.exactagss.com/), a lead
 
 ## Overview
 
-This repository contains code and instructions for implementing cellular-based device management on the ESP32 and the Raspberry Pi through the nrF9160-dk.
+This repository contains code and instructions for implementing cellular-based device management on the ESP32 and the Raspberry Pi through the nRF9160-dk.
 
 ![connectivity map for whole project](images/connectivity.png)
 *Figure 1: Connectivity Map*

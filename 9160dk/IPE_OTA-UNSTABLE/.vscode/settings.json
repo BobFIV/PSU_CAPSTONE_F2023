@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "mcuboot.h": "c",
+        "shell.h": "c",
+        "log.h": "c",
+        "aggregator.h": "c",
+        "string_view": "c"
+    }
+}
