@@ -6,7 +6,34 @@ The firmware update process for specific devices (Raspberry Pi, ESP32, and nRF91
 - [nRF 9160](9160Update.md)
 # Initialization:
 Initialization of the update is done completed following oneM2M. To learn more about oneM2M in our project, see the [oneM2M doc](oneM2M.md)
-When each board is turned on, it will send a CREATE request to the ACME CSE. An UPDATE request is then sent to the CSE to set the version number. In the case of the ESP32 and Raspberry Pi, since they are non-oneM2M devices, these messages are sent to the 9160 and correctly formatted, then sent to the CSE.
+## 1. Subscription Setup
+- nRF9160 Subscription:
+  - The nRF9160 is configured to subscribe to the Django WebApp Application Entity (AE).
+  - This subscription enables the nRF9160 to receive notifications about updates and changes initiated by the Django WebApp AE.
+## 2. Update Initiation
+- Update Push by Django WebApp AE:
+  - When an update for any of the boards is ready, the Django WebApp AE pushes this update.
+  - The update could be related to firmware, software, or other critical data for the devices managed by the WebApp.
+## 3. Notification to nRF9160
+- Notification Receipt:
+  - Upon the update being pushed, the nRF9160 receives a notification due to its active subscription to the Django WebApp AE.
+  - This notification alerts the nRF9160 that a new update is available.
+## 4. Request to Refresh Device Version
+- Update Request Publication:
+  - Following the receipt of the notification, the nRF9160 publishes an update request to the relevant Container within the oneM2M system.
+  - This request is intended to refresh or update the version information of the affected device in the Container.
+## 5. Django WebApp Observes Version Change
+- Observation by Django WebApp:
+  - The Django WebApp AE, also subscribed to the same Container, detects the change in version information.
+  - This change triggers the next step in the update process within the WebApp's interface.
+## 6. User Interface Interaction
+- Update/Revert Options Presented to User:
+  - In the Django WebApp's user interface, an update or revert option becomes available to the user, corresponding to the version change observed.
+  - This allows the user to make an informed decision about proceeding with the update.
+## 7. Execution of Update/Revert
+- User Triggered Action:
+  - When the user selects either the update or revert option in the WebApp interface, this action triggers the final update process.
+  - The procedure for the update begins. Currently, once an update begins, there is no way for you to stop it.
 
 Add view of CSE here.
 
