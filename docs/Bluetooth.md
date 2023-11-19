@@ -84,7 +84,9 @@ gives back the semaphore.
 
 ### Receiving a message
 #### static uint8_t ble_data_received(struct bt_nus_client *nus, const uint8_t *data, uint16_t len)
-1. Checking for the one-byte header, the next course of action is determined.
+1. The message is read and checked for the one-byte header.
+2. Based on the header, the packet is placed in the uplink or downlink packet. Most messages are placed in the uplink to be sent over MQTT to the correct topic. If the message is intended for interboard communiation (ESP32 -> Raspberry Pi), it is placed into downlink aggregator instead.
+3. Depending on the message type, such as update errors, they are handled immediately.
 
 
 
