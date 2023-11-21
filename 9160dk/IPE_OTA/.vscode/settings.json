@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "mcuboot.h": "c",
-        "shell.h": "c"
-    }
-}
