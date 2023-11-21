@@ -16,7 +16,7 @@ In order to sort the messages coming to the 9160DK, a header system was implemen
 - 0x05: Train Location. This is strictly Demo data. It will be sent to the 9160 and published to the Demo topic to keep the WebApp aware of the train location of fruits and vegetables.
 
 ## Code Breakdown
-All code is located in [ble.c](../9160dk) to-do: fix link once full release is out.
+All code is located in [ble.c](../9160dk/IPE_OTA_BLE/src/ble.c) of the 9160DK firmware.
 ### Initialization
 At initialization, the table mapping device names to connection indexes are cleared to zero. The ctx_lib is also initialized with ```BT_CONN_CTX_DEF(ctx_lib, sizeof(struct bt_nus_client), MAX_CONNECTED_DEVICES);```.
 The following are done in this order:
