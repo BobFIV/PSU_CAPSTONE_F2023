@@ -24,19 +24,19 @@ The program also supports connections to the following boards:
 
 Under the oneM2M standard, an IPE (interworking proxy entity) is a oneM2M compliant device that bridges non-oneM2M devices to the oneM2M network.
 
-This program leverages the following connections:
+This program creates the following connections:
 
 - MQTT connection over cellular to an ACME server
 - MQTT connection over cellular to a server hosting firmware
 - UART connection to the on-board 52840 SoC, which runs as a BLE HCI controller
-- BLE connection to an external Raspberry Pi
-- BLE connection to an external ESP32
+- BLE connection to an external Raspberry Pi. Learn more about BLE in this project [here](../../docs/Bluetooth.md)
+- BLE connection to an external ESP32. Learn more about BLE in this project [here](../../docs/Bluetooth.md)
 
 Using these connections, it accomplishes the following:
 
-- Validate and receive 9160 firmware for an OTA (over the air) update
-- Validate and forward ESP32 and Raspberry Pi firmware updates
-- Handle errors for these updates
+- Validate and receive 9160 firmware for an OTA (over the air) update. See more for [9160 updates here](../../docs/9160Update.md)
+- Validate and forward ESP32 and Raspberry Pi firmware updates. See more for [ESP32 updates](../../docs/ESP32Update.md) or [Raspberry Pi Updates](../../docs/RpiUpdate.md)
+- Handle errors for these updates. See more [here](../../docs/firmwareUpdate.md)
 - Subscribe and Update the ACME CSE for device management
 - Handle oneM2M messages and respond following the oneM2M standard
 - Run Peer-to-Peer data transfer: It will transmit images from the ESP32 to the Raspberry Pi
