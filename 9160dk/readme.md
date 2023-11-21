@@ -2,10 +2,10 @@
 Pennsylvania State University Fall 2023 Capstone Project
 
 Sponsored by Exacta Global Smart Solutions
-
-Firmware for the Nordic Semicondutor nRF9160 Development Kit. See the readme in each program for deeper explanation here:
-- [52840](hci_lpuart) runs the lower-levels of the BLE stack.
-- [9160](IPE_OTA) runs the IPE-OTA program, which manages MQTT over LTE, oneM2M communications, OTA updates and the upper layers of the BLE stack. If you are interested in the 9160 DK's code, you are likely searching here.
+The Nordic Semicondutor nRF9160 Development Kit contains two systems on board: the nRF9160 SoC (main) and nRF52840 (board controller).  
+See the readme in each board for deeper explanation here:
+- [52840](hci_lpuart) runs the lower-levels of the BLE stack. Very few changes from the [original Nordic sample](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/samples/bluetooth/hci_lpuart/README.html)
+- [9160](IPE_OTA-BLE) runs the IPE-OTA-BLE program, which manages MQTT over LTE, oneM2M communications, OTA updates and the upper layers of the BLE stack. If you are interested in details regarding the 9160 DK's code, you are likely searching here.
 
 Directions to build the programs are also provided in the respective documents. Build and flash the 52840 (hci_lpuart) program **first** before building and flashing the 9160 (IPE_OTA) program.
 ## Building the files
