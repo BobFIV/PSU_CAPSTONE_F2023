@@ -1,4 +1,4 @@
-.. hci-lpuart:
+.. _bluetooth-hci-lpuart-sample:
 
 Bluetooth: HCI low power UART
 #############################
