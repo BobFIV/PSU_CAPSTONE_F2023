@@ -13,7 +13,7 @@
 #include <stdbool.h>
 
 #include "update.h"                 // Update header file
-
+#include "main.h"                // Main header file for LEDs.
 #define SECONDARY_PARTITION_LABEL mcuboot_secondary
 #define FIXED_CHUNK_SIZE 273
 
@@ -118,6 +118,8 @@ int process_firmware_chunk(int chunk_id, const char *decoded_data, size_t decode
     // Check if this is the last chunk
     if (currentChunk == total9160Chunks) {
         printk("Firmware update complete. Finalizing update...\n");
+        led_condition &= ~CONDITION_FIRMWARE_UPDATING;
+        led_condition |= CONDITION_FIRMWARE_DONE;
         err = finalize_firmware_update();
         if (err != 0) {
             printk("Error finalizing firmware update: %d\n", err);

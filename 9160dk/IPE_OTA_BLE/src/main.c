@@ -27,13 +27,21 @@
 #include "ble.h"
 #include "mqtt_ble_pipe.h"
 #include "update.h"
+#include "main.h"
 
+
+
+#define FAST_BLINK_INTERVAL 250  // 250 ms.
+#define SLOW_BLINK_INTERVAL 500  
+#define VERY_SLOW_BLINK_INTERVAL 1000  
 
 static K_SEM_DEFINE(lte_connected, 0, 1);
 /* The mqtt client struct */
 struct mqtt_client client;
 /* File descriptor */
 struct pollfd fds;
+
+uint32_t led_condition = 0; //Current LED condition.
 
 LOG_MODULE_REGISTER(lte_ble_gw, CONFIG_LTE_BLE_GW_LOG_LEVEL);
 
@@ -54,32 +62,18 @@ LOG_MODULE_REGISTER(lte_ble_gw, CONFIG_LTE_BLE_GW_LOG_LEVEL);
 #define LED_BLINK(x)		((x) << 8)
 #define LED_GET_ON(x)		((x) & 0xFF)
 #define LED_GET_BLINK(x)	(((x) >> 8) & 0xFF)
+#define LEDS_RAPID_BLINK_INTERVAL K_MSEC(100) // 100 milliseconds
+
 
 /* Interval in milliseconds after the device will retry cloud connection
  * if the event NRF_CLOUD_EVT_TRANSPORT_CONNECTED is not received.
  */
 #define RETRY_CONNECT_WAIT K_MSEC(90000)
 
-//To do: Update LEDs.
-enum {
-	LEDS_INITIALIZING       = LED_ON(0),
-	LEDS_LTE_CONNECTING     = LED_BLINK(DK_LED3_MSK),
-	LEDS_LTE_CONNECTED      = LED_ON(DK_LED3_MSK),
-	LEDS_CLOUD_CONNECTING   = LED_BLINK(DK_LED4_MSK),
-	LEDS_CLOUD_PAIRING_WAIT = LED_BLINK(DK_LED3_MSK | DK_LED4_MSK),
-	LEDS_CLOUD_CONNECTED    = LED_ON(DK_LED4_MSK),
-	LEDS_ERROR              = LED_ON(DK_ALL_LEDS_MSK)
-} display_state;
-
-
-
-
 /* Structures for work */
 struct k_work_delayable leds_update_work;
 struct k_work_delayable periodic_transmit_work;
 struct k_work_delayable periodic_publish_work;
-
-
 
 
 enum error_type {
@@ -168,35 +162,68 @@ void nrf_modem_fault_handler(struct nrf_modem_fault_info *fault_info)
 {
 	error_handler(ERROR_MODEM_RECOVERABLE, (int)fault_info->reason);
 }
+static uint32_t last_update = 0;
 
 /**@brief Update LEDs state. */
-static void leds_update(struct k_work *work)
-{
-	static bool led_on;
-	static uint8_t current_led_on_mask;
-	uint8_t led_on_mask = current_led_on_mask;
+static void leds_update(struct k_work *work) {
+    static bool fast_blink_on = false, slow_blink_on = false, very_slow_blink_on = false;
+    static uint32_t last_fast_blink = 0, last_slow_blink = 0, last_very_slow_blink = 0;
+    uint8_t led_blink_mask = 0, led_on_mask = 0;
+    uint32_t now = k_uptime_get_32();
 
-	ARG_UNUSED(work);
+    // Fast Blink Toggle
+    if (now - last_fast_blink >= FAST_BLINK_INTERVAL) {
+        fast_blink_on = !fast_blink_on;
+        last_fast_blink = now;
+    }
 
-	/* Reset LED3 and LED4. */
-	led_on_mask &= ~(DK_LED3_MSK | DK_LED4_MSK);
+    // Slow Blink Toggle
+    if (now - last_slow_blink >= SLOW_BLINK_INTERVAL) {
+        slow_blink_on = !slow_blink_on;
+        last_slow_blink = now;
+    }
 
-	/* Set LED3 and LED4 to match current state. */
-	led_on_mask |= LED_GET_ON(display_state);
+    // Very Slow Blink Toggle
+    if (now - last_very_slow_blink >= VERY_SLOW_BLINK_INTERVAL) {
+        very_slow_blink_on = !very_slow_blink_on;
+        last_very_slow_blink = now;
+    }
 
-	led_on = !led_on;
-	if (led_on) {
-		led_on_mask |= LED_GET_BLINK(display_state);
-	} else {
-		led_on_mask &= ~LED_GET_BLINK(display_state);
+    // Set LED masks based on conditions
+    if ((led_condition & CONDITION_ESP32_CONNECTING) && fast_blink_on) {
+        led_blink_mask |= DK_LED1_MSK;
+    } else if ((led_condition & CONDITION_ESP32_SCANNING) && slow_blink_on) {
+        led_blink_mask |= DK_LED1_MSK;
+    } else if ((led_condition & CONDITION_ESP32_UPDATING) && very_slow_blink_on) {
+        led_blink_mask |= DK_LED1_MSK;
+    } else if (led_condition & CONDITION_ESP32_CONNECTED) {
+        led_on_mask |= DK_LED1_MSK;
+    }
+
+	if ((led_condition & CONDITION_RPI_CONNECTING) && fast_blink_on) {
+		led_blink_mask |= DK_LED2_MSK;
+	} else if ((led_condition & CONDITION_RPI_SCANNING) && slow_blink_on) {
+		led_blink_mask |= DK_LED2_MSK;
+	} else if ((led_condition & CONDITION_RPI_UPDATING) && very_slow_blink_on) {
+		led_blink_mask |= DK_LED2_MSK;
+	} else if (led_condition & CONDITION_RPI_CONNECTED) {
+		led_on_mask |= DK_LED2_MSK;
 	}
 
-	if (led_on_mask != current_led_on_mask) {
-		dk_set_leds(led_on_mask);
-		current_led_on_mask = led_on_mask;
+	// LTE and MQTT Conditions
+	if ((led_condition & CONDITION_LTE_CONNECTING) && slow_blink_on) {
+		led_blink_mask |= DK_LED3_MSK;
+	} else if ((led_condition & CONDITION_MQTT_CONNECTING) && fast_blink_on) {
+		led_blink_mask |= DK_LED3_MSK;
+	} else if (led_condition & CONDITION_MQTT_LTE_CONNECTED) {
+		led_on_mask |= DK_LED3_MSK;
 	}
 
-	k_work_schedule(&leds_update_work, LEDS_UPDATE_INTERVAL);
+   // Update LEDs
+    dk_set_leds(led_blink_mask | led_on_mask);
+
+    // Reschedule work
+    k_work_schedule(&leds_update_work, LEDS_UPDATE_INTERVAL);
 }
 
 
@@ -236,7 +263,7 @@ static void work_init(void)
 static int modem_configure(void)
 {
 	int err;
-
+	led_condition |= CONDITION_LTE_CONNECTING; //Set LED condition to LTE connecting.
 	LOG_INF("Initializing modem library");
 
 	err = nrf_modem_lib_init();
@@ -255,13 +282,15 @@ static int modem_configure(void)
 
 	k_sem_take(&lte_connected, K_FOREVER);
 	LOG_INF("Connected to LTE network");
-	display_state = LEDS_LTE_CONNECTED;
+	led_condition &= ~CONDITION_LTE_CONNECTING; 
+	led_condition |= CONDITION_MQTT_CONNECTING;	//LTE is complete. Next step is MQTT.
 
 	return 0;
 }
 
 int main(void)
 {
+	
 	int err;
 	uint32_t connect_attempt = 0;
 	LOG_INF("Welcome to PSU CAPSTONE FALL 2023");
@@ -269,7 +298,6 @@ int main(void)
 	if (dk_leds_init() != 0) {
 		LOG_ERR("Failed to initialize the LED library");
 	}
-
 	err = modem_configure();
 	if (err) {
 		LOG_ERR("Failed to configure the modem");
