@@ -27,21 +27,22 @@
 #include <zephyr/logging/log.h>
 #include "aggregator.h"
 #include "ble.h"
+#include "main.h"
 
 
 #define NUS_WRITE_TIMEOUT K_MSEC(150)
 
-//#define DEVICE_NAME_RPI "RaspberryPi"
-//#define DEVICE_NAME_ESP32 "ESP32"
 static char* ESP32_device_name = "ESP32";
 static char* RaspberryPi_device_name = "RaspberryPi";
 static char* target_device_name;
-//static char *current_scanning_for = NULL;
 static struct bt_conn *default_conn;
-//static struct bt_nus_client default_nus_client;
 struct k_work_delayable periodic_switch_work;
+static bool RPiConnected = false;
+static bool ESP32Connected = false;
 K_SEM_DEFINE(nus_write_sem, 0, 1);
-
+struct k_mutex connect_mutex;
+static bool isConnecting = false;
+static char* connected_device_name;
 LOG_MODULE_DECLARE(lte_ble_gw);
 
 //BLE one-byte headers for BLE communication used in receiver.
@@ -74,13 +75,49 @@ Potential To-Do: Add a check to see if the device is already connected. If so, d
 static void switch_device_name(struct k_work *work) {
     struct k_work_delayable *dwork = CONTAINER_OF(work, struct k_work_delayable, work);
 
-    LOG_INF("Switching device name...");
     const char *new_name;
-    if (strcmp(target_device_name, RaspberryPi_device_name) == 0) {
-        new_name = ESP32_device_name;
+    if (strcmp(target_device_name, RaspberryPi_device_name) == 0) { //The current name is Raspbery Pi
+        if (!ESP32Connected) 
+        {
+            new_name = ESP32_device_name;
+            led_condition &= ~CONDITION_ESP32_CONNECTED;
+            led_condition &= ~CONDITION_ESP32_CONNECTING;
+            led_condition &= ~CONDITION_RPI_SCANNING;
+            led_condition |= CONDITION_ESP32_SCANNING;
+        } else
+        {
+            // If the ESP32 is connected, do not switch to it.
+            // No need to swap between rPi and ESP32 either, so do not reschedule.
+            LOG_INF("ESP32 is already connected, not switching device name.");
+            led_condition &= ~CONDITION_RPI_CONNECTED;
+            led_condition &= ~CONDITION_RPI_CONNECTING;
+            led_condition &= ~CONDITION_ESP32_SCANNING;
+            led_condition |= CONDITION_RPI_SCANNING;
+            return; 
+        }
+        
     } else {
-        new_name = RaspberryPi_device_name;
+        if (!RPiConnected) 
+        {
+            new_name = RaspberryPi_device_name;
+            led_condition &= ~CONDITION_RPI_CONNECTED;
+            led_condition &= ~CONDITION_RPI_CONNECTING;
+            led_condition &= ~CONDITION_ESP32_SCANNING;
+            led_condition |= CONDITION_RPI_SCANNING;
+        }
+        else
+        {
+            // If the rPi is connected, do not switch to it.
+            // No need to swap between rPi and ESP32 either, so do not reschedule.
+            LOG_INF("Raspberry Pi is already connected, not switching device name.");
+            led_condition &= ~CONDITION_ESP32_CONNECTED;
+            led_condition &= ~CONDITION_ESP32_CONNECTING;
+            led_condition &= ~CONDITION_RPI_SCANNING;
+            led_condition |= CONDITION_ESP32_SCANNING;
+            return;
+        }
     }
+    LOG_INF("Switching device name...");
 
     strncpy(target_device_name, new_name, DEVICE_NAME_MAX_SIZE - 1);
     target_device_name[DEVICE_NAME_MAX_SIZE - 1] = '\0'; // Ensure null termination
@@ -105,6 +142,7 @@ static void switch_device_name(struct k_work *work) {
 
     LOG_INF("Now scanning for: %s", target_device_name);
     k_work_reschedule(dwork, K_MSEC(10000));
+
 }
 
 /*
@@ -203,15 +241,14 @@ static void discovery_completed(struct bt_gatt_dm *dm, void *context)
     // So we have to iterate through the context library to find the device that matches the nus client we just discovered.
     // Then, we map that device to the table so we can pick the device using the name when we send data later.
     // We compare the target device name to the device we are scanning for, and set it to that in our table.  (if we switch during this function we're in big trouble)
+    k_mutex_lock(&connect_mutex, K_FOREVER);
     for (size_t i = 0; i < num_nus_conns; i++) {
-		const struct bt_conn_ctx *ctx =
-				bt_conn_ctx_get_by_id(&ctx_lib_ctx_lib, i);
-		
+		const struct bt_conn_ctx *ctx = bt_conn_ctx_get_by_id(&ctx_lib_ctx_lib, i);
 		if (ctx) {
 			if (ctx->data == nus) {
 				nus_index = i;
-                const char *device_name = (strcmp(target_device_name, "RaspberryPi") == 0) ? "RaspberryPi" : "ESP32";
-                strncpy(device_maps[nus_index].device_name, device_name, sizeof(device_maps[nus_index].device_name));
+                //const char *device_name = (strcmp(connected_device_name, "RaspberryPi") == 0) ? "RaspberryPi" : "ESP32";
+                strncpy(device_maps[nus_index].device_name, connected_device_name, sizeof(device_maps[nus_index].device_name));
                 device_maps[nus_index].id = nus_index;
                 
                 err = bt_nus_client_send(nus, (uint8_t *) "ping!", 5);
@@ -221,6 +258,17 @@ static void discovery_completed(struct bt_gatt_dm *dm, void *context)
                     LOG_INF("Data sent successfully");
                 }
                 bt_conn_ctx_release(&ctx_lib_ctx_lib, (void *) ctx->data);
+                if (strcmp(connected_device_name, "RaspberryPi") == 0) {
+                    LOG_INF("RaspberryPi connected");
+                    RPiConnected = true;
+                    led_condition &= ~CONDITION_RPI_CONNECTING;
+                    led_condition |= ~CONDITION_RPI_CONNECTED;
+                } else {
+                    LOG_INF("ESP32 connected");
+                    ESP32Connected = true;
+                    led_condition &= ~CONDITION_ESP32_CONNECTING;
+                    led_condition |= ~CONDITION_ESP32_CONNECTED;
+                }
 				break;
 			}
 		} else {
@@ -228,13 +276,8 @@ static void discovery_completed(struct bt_gatt_dm *dm, void *context)
             bt_conn_ctx_release(&ctx_lib_ctx_lib, (void *) ctx->data);
         }
 	}
-    /*
-    LOG_INF("Current device map is:");
-    for (size_t i = 0; i < num_nus_conns; i++) {
-    LOG_INF("Device map [%d]: Name = %s, ID = %d", i, device_maps[i].device_name, device_maps[i].id);
-    }
-    */
-    
+    isConnecting = false;
+    k_mutex_unlock(&connect_mutex);
     LOG_INF("Donezo.");
 
 }
@@ -261,7 +304,7 @@ static void gatt_discover(struct bt_conn *conn)
 {
 	int err;
     LOG_INF("gatt_discover called");
-	struct bt_nus_client *nus_client = bt_conn_ctx_get(&ctx_lib_ctx_lib, conn);
+    struct bt_nus_client *nus_client =bt_conn_ctx_get(&ctx_lib_ctx_lib, conn);
     if (!nus_client) {
         LOG_ERR("No NUS client found for connection");
         return;
@@ -292,8 +335,21 @@ static void exchange_func(struct bt_conn *conn, uint8_t err, struct bt_gatt_exch
 static void connected(struct bt_conn *conn, uint8_t conn_err) {
     char addr[BT_ADDR_LE_STR_LEN];
     int err;
-
-        // Initialize NUS client
+    k_mutex_lock(&connect_mutex, K_FOREVER);
+    isConnecting = true;
+    connected_device_name = (strcmp(target_device_name, "RaspberryPi") == 0) ? "RaspberryPi" : "ESP32";
+    k_mutex_unlock(&connect_mutex);
+    
+    if (strcmp(connected_device_name, "RaspberryPi") == 0)  {
+        LOG_INF("RaspberryPi found");
+        led_condition &= ~CONDITION_RPI_SCANNING;
+        led_condition |= CONDITION_RPI_CONNECTING;
+    } else {
+        LOG_INF("ESP32 found");
+        led_condition &= ~CONDITION_ESP32_SCANNING;
+        led_condition |= CONDITION_ESP32_CONNECTING;
+    }
+    // Initialize NUS client
     struct bt_nus_client_init_param init = {
         .cb = {
             .received = ble_data_received,
@@ -317,7 +373,7 @@ static void connected(struct bt_conn *conn, uint8_t conn_err) {
         }
 
         LOG_ERR("Failed to connect to %s (%u)", addr, conn_err);
-        return;
+        goto error;
     }
 
     LOG_INF("Connected: %s", addr);
@@ -326,7 +382,7 @@ static void connected(struct bt_conn *conn, uint8_t conn_err) {
 
     if (!nus_client) {
         LOG_WRN("No free memory to allocate the connection context");
-        return;
+        goto error;
     }
 
     memset(nus_client, 0, bt_conn_ctx_block_size_get(&ctx_lib_ctx_lib));
@@ -338,6 +394,7 @@ static void connected(struct bt_conn *conn, uint8_t conn_err) {
     
     if (err) {
         LOG_ERR("NUS Client initialization failed (err %d)", err);
+        goto error;
     } else {
         LOG_INF("NUS Client module initialized");
     }
@@ -352,6 +409,7 @@ static void connected(struct bt_conn *conn, uint8_t conn_err) {
     err = bt_gatt_exchange_mtu(conn, &exchange_params);
     if (err) {
         LOG_WRN("MTU exchange failed (err %d)", err);
+        goto error;
     }
     
     
@@ -360,6 +418,7 @@ static void connected(struct bt_conn *conn, uint8_t conn_err) {
     if (err) {
         LOG_WRN("Failed to set security: %d", err);
         gatt_discover(conn);
+        goto error;
     }
 
    LOG_INF("Discovery started");
@@ -368,39 +427,62 @@ static void connected(struct bt_conn *conn, uint8_t conn_err) {
 	err = bt_scan_stop();
 	if ((!err) && (err != -EALREADY)) {
 		LOG_ERR("Stop LE scan failed (err %d)", err);
+        goto error;
 	}
     //default_conn = conn;
+    error:
+        k_mutex_lock(&connect_mutex, K_FOREVER);
+        isConnecting = false;
+        k_mutex_unlock(&connect_mutex);
+        return;
 }
 
 static void disconnected(struct bt_conn *conn, uint8_t reason) {
     char addr[BT_ADDR_LE_STR_LEN];
-    int err;
-
     bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
-
     LOG_INF("Disconnected: %s, Reason: %u", addr, reason);
-    //remove_connection(conn);  // Remove the connection from the list
-    //To-DO: Remove from table.
-    err = bt_conn_ctx_free(&ctx_lib_ctx_lib, conn);
+    
+    bool should_reschedule = false;
+    // Removing connection from device maps and updating flags
+    for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
+        if (device_maps[i].id != -1) {
+            struct bt_conn *existing_conn = bt_conn_lookup_addr_le(BT_ID_DEFAULT, bt_conn_get_dst(conn));
+            if (existing_conn) {
+                struct bt_nus_client *existing_nus_client = bt_conn_ctx_get(&ctx_lib_ctx_lib, existing_conn);
+                if (existing_nus_client) {
+                    if (strcmp(device_maps[i].device_name, "RaspberryPi") == 0) {
+                        RPiConnected = false;
+                        led_condition &= ~CONDITION_RPI_CONNECTED;
+                        should_reschedule = true;
+                    } else if (strcmp(device_maps[i].device_name, "ESP32") == 0) {
+                        ESP32Connected = false;
+                        led_condition &= ~CONDITION_ESP32_CONNECTED;
+                        should_reschedule = true;
+                    }
+                    device_maps[i].device_name[0] = '\0'; // Clearing the device name
+                    device_maps[i].id = -1; // Resetting the id
+                    bt_conn_unref(existing_conn);
+                    break;
+                }
+                bt_conn_unref(existing_conn);
+            }
+        }
+    }
+
+    int err = bt_conn_ctx_free(&ctx_lib_ctx_lib, conn);
     if (err) {
-		LOG_WRN("The memory was not allocated for the context of this connection.");
-	}
+        LOG_WRN("The memory was not allocated for the context of this connection.");
+    }
 
     bt_conn_unref(conn);
     default_conn = NULL;
 
-
-    //bt_conn_unref(default_conn);
-    //default_conn = NULL;
-
-    /*
-    err = bt_scan_start(BT_SCAN_TYPE_SCAN_ACTIVE);
-    if (err) {
-        LOG_ERR("Scanning failed to start (err %d)", err);
+    // Reschedule the work if a device was disconnected
+    if (should_reschedule) {
+        k_work_reschedule(&periodic_switch_work, K_NO_WAIT);
     }
-    LOG_INF("Scan started again due to disconnect.");
-    */
 }
+
 static void security_changed(struct bt_conn *conn, bt_security_t level,
 			     enum bt_security_err err)
 {
@@ -474,7 +556,12 @@ static int scan_init(void) {
     } 
     char * default_target_name = "ESP32";
     strncpy(target_device_name, default_target_name, 30); //initailize to the ESP32.
-
+    connected_device_name = k_malloc(30);
+    if (!connected_device_name) {
+        LOG_ERR("Failed to allocate memory for connected_device_name");
+        return -ENOMEM; // or another appropriate error code
+    }
+    connected_device_name[0] = '\0';
     bt_scan_init(&scan_init);
     bt_scan_cb_register(&scan_cb);
 
@@ -483,6 +570,8 @@ static int scan_init(void) {
         LOG_ERR("Scanning filters for %s service cannot be set", target_device_name);
         return err;
     }
+
+    led_condition |= CONDITION_ESP32_SCANNING;
 
     err = bt_scan_filter_enable(BT_SCAN_NAME_FILTER, true);
     if (err) {
@@ -631,7 +720,7 @@ int ble_init(void)
         device_maps[i].id = -1;
         device_maps[i].device_name[0] = '\0';
     }
-
+    k_mutex_init(&connect_mutex);
 	err = bt_conn_auth_cb_register(&conn_auth_callbacks);
 	if (err) {
 		LOG_ERR("Failed to register authorization callbacks.");

@@ -17,7 +17,7 @@
 #include "update.h"
 #include "cJSON.h"
 #include "aggregator.h"
-
+#include "main.h"
 
 /* Buffers for MQTT client. */
 static uint8_t rx_buffer[CONFIG_MQTT_MESSAGE_BUFFER_SIZE];
@@ -109,7 +109,8 @@ static int subscribe(struct mqtt_client *const c)
     for (int i = 0; i < ARRAY_SIZE(subscribe_topics); i++) {
         LOG_INF("Topic %d: %s", i, subscribe_topics[i].topic.utf8);
     }
-
+	led_condition &= ~CONDITION_MQTT_CONNECTING;
+	led_condition |= CONDITION_MQTT_LTE_CONNECTED;
     return mqtt_subscribe(c, &subscription_list);
 }
 
@@ -354,60 +355,57 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 			LOG_ERR("Failed to parse JSON payload");
 			return;
 		}
-		if (strncmp(p->message.topic.topic.utf8, "/oneM2M/resp/NRFParent:NRF9160/capstone-iot/json", p->message.topic.topic.size) == 0) {
-			// Handle message for the /oneM2M/resp/NRFParent:NRF9160/capstone-iot/json topic
-				
-			//Extracting data.
+		if (strncmp(p->message.topic.topic.utf8, "/oneM2M/req/capstone-iot/NRFParent/json", p->message.topic.topic.size) == 0) {
+        // Handle message for the /oneM2M/req/capstone-iot/NRFParent/json topic
+
 			if (err >= 0) {
-				data_print("Received: ", payload_buf, p->message.payload.len);
-				// Parsing the payload
-				cJSON *json_payload = cJSON_Parse(payload_buf);
-				if (!json_payload)
-				{
-					LOG_ERR("Failed to parse JSON payload");
-					return;
-				}
-				//Extracting the "rqi" field
-				cJSON *rqi = cJSON_GetObjectItem(json_payload, "rqi"); //Do I need case sensitive here? Check later.
-				if (rqi && cJSON_IsString(rqi) && (rqi->valuestring != NULL))
-				{
-					if (strcmp(rqi->valuestring, "LED1ON") == 0)	//These are just test functions to make sure string parse worked. I'll get rid of it soon enough.
-					{
-						LOG_INF("LED1ON");
-						dk_set_led_on(LED_CONTROL_OVER_MQTT);
+				// Extract relevant fields from the payload
+				cJSON *rqi = cJSON_GetObjectItemCaseSensitive(json_payload, "rqi");
+				cJSON *ot = cJSON_GetObjectItemCaseSensitive(json_payload, "ot");
+				// Add more fields as per your oneM2M requirements
+
+				if (rqi && cJSON_IsString(rqi) && (rqi->valuestring != NULL)) {
+					// Process the message based on the extracted data
+					// ...
+
+					// Prepare a response message
+					cJSON *response_json = cJSON_CreateObject();
+					cJSON_AddStringToObject(response_json, "rqi", rqi->valuestring);
+					cJSON_AddStringToObject(response_json, "ot", ot ? ot->valuestring : "");
+					cJSON_AddNumberToObject(response_json, "rsc", 2001); // Response Status Code
+					// Add additional fields to the response as needed
+
+					char *response_str = cJSON_PrintUnformatted(response_json);
+					if (response_str) {
+						// Publish the response
+						struct mqtt_publish_param publish_param;
+						memset(&publish_param, 0, sizeof(publish_param));
+						publish_param.message.topic.qos = MQTT_QOS_1_AT_LEAST_ONCE;
+						publish_param.message.topic.topic.utf8 = "/oneM2M/resp/capstone-iot/NRFParent/json";
+						publish_param.message.topic.topic.size = strlen("/oneM2M/resp/capstone-iot/NRFParent/json");
+						publish_param.message.payload.data = response_str;
+						publish_param.message.payload.len = strlen(response_str);
+
+						err = mqtt_publish(c, &publish_param);
+						if (err) {
+							LOG_ERR("Failed to publish response: %d", err);
+						}
+
+						free(response_str);
 					}
-					else if (strcmp(rqi->valuestring, "LED1OFF") == 0)
-					{
-						LOG_INF("LED1OFF");
-						dk_set_led_off(LED_CONTROL_OVER_MQTT);
-					}
-					else
-					{
-						//Deal with other oneM2M stuff.
-					}
-				}
-				else
-				{
-					LOG_ERR("Failed to extract rqi");
+
+					cJSON_Delete(response_json);
+				} else {
+					LOG_ERR("Required fields missing in the payload");
 				}
 
 				cJSON_Delete(json_payload);
-			
-			// Payload buffer is smaller than the received data 
 			} else if (err == -EMSGSIZE) {
-				LOG_ERR("Received payload (%d bytes) is larger than the payload buffer size (%d bytes).",
-					p->message.payload.len, sizeof(payload_buf));
-			// Failed to extract data, disconnect 
+				LOG_ERR("Received payload is larger than buffer.");
 			} else {
-				LOG_ERR("get_received_payload failed: %d", err);
-				LOG_INF("Disconnecting MQTT client...");
-
-				err = mqtt_disconnect(c);
-				if (err) {
-					LOG_ERR("Could not disconnect: %d", err);
-				}
+				LOG_ERR("Failed to extract payload: %d", err);
 			}
-		}
+   		}
 		// Check for the type of message
 		if (cJSON_HasObjectItem(json_payload, "Total Update Chunks")) { //In this case its a message regarding update.
 			cJSON *total_chunks = cJSON_GetObjectItem(json_payload, "Total Update Chunks");
@@ -435,6 +433,8 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 				totalESP32Chunks = total_chunks->valueint;
 				updateESP32Flag = true;
 				packet.destination = DESTINATION_ESP32;
+				led_condition &= ~CONDITION_ESP32_CONNECTED;
+				led_condition |= CONDITION_ESP32_UPDATING;
 			} else if (strncmp(p->message.topic.topic.utf8, "/9160/Update", p->message.topic.topic.size) == 0) {
 				// Handle message for the /9160/Update topic
 				if (update9160Flag == true)
@@ -445,6 +445,7 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 				}
 				total9160Chunks = total_chunks->valueint;
 				update9160Flag = true;
+				led_condition |= CONDITION_FIRMWARE_UPDATING;
 				publishUpdateReady(c, "/9160/Update", total9160Chunks, total_size->valuestring); //Publish ready to update message for 9160. 
 				LOG_INF("Ready to receive updates for 9160!");
 			} else if (strncmp(p->message.topic.topic.utf8, "/RaspberryPi/Update", p->message.topic.topic.size) == 0) {
@@ -459,6 +460,8 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 				updateRPiFlag = true;
 				LOG_INF("Ready to receive updates for RaspberryPi!");
 				packet.destination= DESTINATION_RaspberryPi;
+				led_condition &= ~CONDITION_RPI_CONNECTED;
+				led_condition |= CONDITION_RPI_UPDATING;
 			} else {
 				LOG_WRN("Receieved message on unknown topic: %.*s",
 					p->message.topic.topic.size,

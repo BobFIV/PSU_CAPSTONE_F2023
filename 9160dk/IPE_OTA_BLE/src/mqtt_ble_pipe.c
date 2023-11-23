@@ -70,8 +70,7 @@ const char* setTopic(enum uplink_data_packet_type packetType, enum ble_source so
             break;
 
         case uplink_FIRMWARE_VERSION:
-            // Assuming oneM2M updates are sent to a specific topic
-            return "/oneM2M/resp/capstone-iot/NRFParent/json";  // Modify as needed for your CSE topic
+            return "/oneM2M/resp/capstone-iot/NRFParent/json";  
 
         case uplink_TRAIN_LOCATION:
             // Location data from Raspberry Pi to Django

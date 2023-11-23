@@ -6,39 +6,35 @@ The firmware update process for specific devices (Raspberry Pi, ESP32, and nRF91
 - [nRF 9160](9160Update.md)
 # Initialization:
 Initialization of the update is done completed following oneM2M. To learn more about oneM2M in our project, see the [oneM2M doc](oneM2M.md)
-## 1. Subscription Setup
+## 1. oneM2M setup
+- Create the Flex Node:
+  - When the 9160DK establishes a connection the the ACME CSE, a CREATE request is sent to establish a new Node and associated FlexNode for itself.
+    - The 9160DK will populate this node with relevant device management information, such as dmDeviceInfo.
+    - This process is repeated for the ESP32 and Raspberry Pi when they are connected to the 9160DK. 
+    - The ESP32 and Raspberry Pi will send relevant information to the 9160 DK to help populate the Flex Nodes for each device.
 - nRF9160 Subscription:
   - The nRF9160 is configured to subscribe to the Django WebApp Application Entity (AE).
   - This subscription enables the nRF9160 to receive notifications about updates and changes initiated by the Django WebApp AE.
+  - The nRF9160 DK is also subscribed to all of the resources corresponding to the Flex nodes for each device. Thus, any change in the Flex Nodes will notify the 9160 DK.
+- Django Subscription:
+  - Likewise, Django is also subscribed to each device and their device management resources. This is done so when an update is completed, Django is notified from ACME.
 ## 2. Update Initiation
 - Update Push by Django WebApp AE:
-  - When an update for any of the boards is ready, the Django WebApp AE pushes this update.
-  - The update could be related to firmware, software, or other critical data for the devices managed by the WebApp.
-## 3. Notification to nRF9160
-- Notification Receipt:
-  - Upon the update being pushed, the nRF9160 receives a notification due to its active subscription to the Django WebApp AE.
-  - This notification alerts the nRF9160 that a new update is available.
-## 4. Request to Refresh Device Version
-- Update Request Publication:
-  - Following the receipt of the notification, the nRF9160 publishes an update request to the relevant Container within the oneM2M system.
-  - This request is intended to refresh or update the version information of the affected device in the Container.
-## 5. Django WebApp Observes Version Change
-- Observation by Django WebApp:
-  - The Django WebApp AE, also subscribed to the same Container, detects the change in version information.
-  - This change triggers the next step in the update process within the WebApp's interface.
-## 6. User Interface Interaction
-- Update/Revert Options Presented to User:
-  - In the Django WebApp's user interface, an update or revert option becomes available to the user, corresponding to the version change observed.
-  - This allows the user to make an informed decision about proceeding with the update.
-## 7. Execution of Update/Revert
-- User Triggered Action:
-  - When the user selects either the update or revert option in the WebApp interface, this action triggers the final update process.
-  - The procedure for the update begins. Currently, once an update begins, there is no way for you to stop it.
+  - In our system, the user is able to upload firmware to the WebApp to be sent to any of the devices.
+  - Once firmware is updated, the Django performs a RETRIEVE operation on the dmDeviceInfo resource in the FlexNode of the corresponding device to check the current firmware version against the new version.
+  - If the version on Django is newer, an update is initiated.
+	  - In our demo, the update is initiated via a button. If the version on Django is newer, an "update" button is presented. If it is older, a "revert" button is presented instead.
+## 3. Update Command
+- Django sends an UPDATE (or CREATE) command to the dmPackage field of the device.
+	- The dmPackage resource will contain the following information:
+		- The total update size (in mB)
+		- The total amount of update chunks.
+		- The location for the Update (MQTT Topic, in our case). 
+- The nRF9160 DK will receive this information from the resource since it is subscribed to all device management fields. 
+	- The nRF9160 DK will then forward this information to the device if necessary, and the target device will send a message to initiate the update. 
+	- Once this message is received by the device, the device sets a flag and is ready to accept the update. It will send an update acknowledge message to the corresponding MQTT Topic, which will begin sending the updates in chunks (200 bytes each, 47 Bytes left for header.)
 
 Add view of CSE here.
-
-The nRF9160 is subscribed to the Django WebApp AE. Once the AE pushes an update for any of the boards, the nRF9160 will get a notification. Following this notification, an update request is published to the container to refresh the version of the device in the container. The Django WebApp, also subscribed to each device, will see the version and an update/revert option will now be available to the user. Pressing this update/revert option will then trigger the update to occur.
-
 # The Update:
 The maximum transfer unit, or MTU of our devices in a BLE network with the nRF9160DK is 247 Bytes. This means that although MQTT has a theoretical maximum package size of 256 MB, it is much less processing on the nRF9160DK to pre-chunk the packages down a maximum of 247 before sending.
 ## Topics:
@@ -59,15 +55,8 @@ nRF9160:
 ## Packets:
 
 ### Downlink:
-Two downlink message types are sent from the webapp to the device. An update initilization message and the chunked firmware.  
+Downlink message types are sent from the webapp to the device. To reduce strain during critical events, the only downlink message is the chunked firmware: 
   
-Update Initialize:  
-```
-{
-Total Update Chunks: 123
-Total Size: 1 mB
-}
-```
 Update Chunk:
 ```
 {
@@ -117,5 +106,9 @@ Importantly, the expected chunk number for the update is set to zero.
 Each packet is checked with the the expected chunk number on the 9160. the 9160 will then decode and re-calculate the checksum. If both of these checks pass, then the expected chunk number is incremented and the packet is forwarded over BLE.  
 If either of these checks fail, an error message is published over MQTT to the corresponding topic.  
 For more detail, see the [9160 firmware Update doc](9160Update.md).
-## Confirmation:
-After the board reboots, steps similar to initialization are taken. The 9160, seeing that the board is back from the update (either itself or the ESP32 and Raspberry Pi), will send a UPDATE request to update the firmware version in ACME. In the case of ESP32 and Raspberry Pi, a message containing the firmware version is sent to the 9160, which will use this data to update the CSE.
+# Conclusion:
+After the board reboots, steps similar to **initialization** are taken. 
+1. The 9160DK will send an UPDATE in dmDeviceInfo to update the firmware version of the device.
+	- If the update was for the ESP32 or Raspberry Pi, the 9160 DK will send a message requesting information from the ESP32 or Raspberry Pi when a connection is re-established.
+2. The Django, being subscribed to the device management components, are provided with the new firmware version on each device.
+In the case of Update failure, a timer is enabled on the nRF 9160-DK after it receives a rebooting message. If this timer times out, an update failed message is sent to update the dmDeviceInfo instead.
