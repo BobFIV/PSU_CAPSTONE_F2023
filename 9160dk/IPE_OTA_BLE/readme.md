@@ -5,7 +5,7 @@ Sponsored by Exacta Global Smart Solutions
 
 This program runs a oneM2M compliant IPE program, communicating to the cloud via MQTT over cellular.
 
-The program also runs a Bluetooth® Low Energy central program to manage devices on the Raspberry Pi and ESP32.
+The program also runs a Bluetooth® Low Energy central program to connect with the Raspberry Pi and ESP32.
 
 ## Requirements
 
