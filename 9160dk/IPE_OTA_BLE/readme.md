@@ -25,7 +25,8 @@ Under the oneM2M standard, an IPE (interworking proxy entity) is a oneM2M compli
 This program creates the following connections:
 
 - MQTT connection over cellular to an ACME server
-- MQTT connection over cellular to a server hosting firmware
+- MQTT connection over cellular to a oneM2M compliant webapp
+- MQTT connection over cellular to a location hosting firmware (in our case firmware is sent from the webapp).
 - UART connection to the on-board 52840 SoC, which runs as a BLE HCI controller
 - BLE connection to an external Raspberry Pi. Learn more about BLE in this project [here](../../docs/Bluetooth.md)
 - BLE connection to an external ESP32. Learn more about BLE in this project [here](../../docs/Bluetooth.md)
@@ -43,7 +44,7 @@ Using these connections, it accomplishes the following:
 **LED 1** and **LED 2**:
 - **LED 1** blinking: The device is connecting to the ESP32.
 - **LED 1** lit: The device is connected to the ESP32.
-- **LED 2** blining: The device is connecting to the Raspberry Pi
+- **LED 2** blinking: The device is connecting to the Raspberry Pi
 - **LED 2** lit: The device is connected to the Raspberry Pi
 **LED 3** and **LED 4**:
 - **LED 3** blinking: The device is connecting to the LTE network.
