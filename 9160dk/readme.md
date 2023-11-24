@@ -1,5 +1,5 @@
 # nRF9160: IPE PROGRAM
-Pennsylvania State University Fall 2023 Capstone Project
+Pennsylvania State University Fall 2023 Capstone Project  
 Sponsored by Exacta Global Smart Solutions  
   
 The Nordic Semicondutor nRF9160 Development Kit contains two systems on board: the nRF9160 SoC (main) and nRF52840 (board controller).  
