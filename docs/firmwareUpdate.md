@@ -61,7 +61,7 @@ Update Chunk:
 ```
 {
 I: 123,               //Chunk Number, between 0 and Total Update Chunks.
-D: "Encoded_data",    //Data Encoded in Base64
+D: "Encoded_data",    //Data Encoded in Base64. 200 Bytes of data.
 C: "Checksum_value",  //Checksum calculated using CRC32
 }
 ```
