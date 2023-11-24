@@ -1,7 +1,7 @@
 # nRF9160: IPE PROGRAM
 Pennsylvania State University Fall 2023 Capstone Project
-
-Sponsored by Exacta Global Smart Solutions
+Sponsored by Exacta Global Smart Solutions  
+  
 The Nordic Semicondutor nRF9160 Development Kit contains two systems on board: the nRF9160 SoC (main) and nRF52840 (board controller).  
 See the readme in each board for deeper explanation here:
 - [52840](hci_lpuart) runs the lower-levels of the BLE stack. Very few changes from the [original Nordic sample](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/samples/bluetooth/hci_lpuart/README.html)
