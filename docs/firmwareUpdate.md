@@ -36,7 +36,7 @@ Initialization of the update is done completed following oneM2M. To learn more a
 
 Add view of CSE here.
 # The Update:
-The maximum transfer unit, or MTU of our devices in a BLE network with the nRF9160DK is 247 Bytes. This means that although MQTT has a theoretical maximum package size of 256 MB, it is much less processing on the nRF9160DK to pre-chunk the packages down a maximum of 247 before sending.
+The maximum transfer unit, or MTU of our devices in a BLE network with the nRF9160DK is 247 Bytes. This means that although MQTT has a theoretical maximum package size of 256 MB, it is much less processing on the nRF9160DK to pre-chunk the packages down a maximum of 247 before sending. Our system uses 47 bytes for reserve (header), leaving 200 bytes for each package.
 ## Topics:
 Each topic will have specific MQTT topics where any information related to the topic will be published.  
 These are:  
