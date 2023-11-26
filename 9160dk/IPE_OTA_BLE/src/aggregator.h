@@ -83,4 +83,10 @@ void aggregator_clear(void);
 
 int aggregator_element_count_get(void);
 
+void publish_aggregated_data(struct k_work *work);
+
+void transmit_aggregated_data(struct k_work *work);
+
+size_t serialize_downlink_data_packet(const struct downlink_data_packet *packet, uint8_t *buffer, size_t buffer_size);
+
 #endif /* _AGGREGATOR_H_ */

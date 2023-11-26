@@ -25,7 +25,7 @@
 
 #include "mqtt_connection.h"
 #include "ble.h"
-#include "mqtt_ble_pipe.h"
+#include "aggregator.h"
 #include "update.h"
 #include "main.h"
 
@@ -162,7 +162,7 @@ void nrf_modem_fault_handler(struct nrf_modem_fault_info *fault_info)
 {
 	error_handler(ERROR_MODEM_RECOVERABLE, (int)fault_info->reason);
 }
-static uint32_t last_update = 0;
+//static uint32_t last_update = 0;
 
 /**@brief Update LEDs state. */
 static void leds_update(struct k_work *work) {
