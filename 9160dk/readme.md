@@ -18,6 +18,7 @@ You will need the following programs installed:
 - [CMake](https://cmake.org/download/)
 
 Ensure these programs are in your PATH variable.
+Items like Ninja that you will need for building can be used using ```pip``` after installing Python.
 #### Setting up the file directory
 1. After you've installed nRF Connect for Desktop, you'll find a directory called "nordicsemi" (or "ncs" by default) on your computer.
 2. Inside this "nordicsemi" directory, you'll see a subdirectory named after your nRF Connect version (e.g., "v2.4.2" for version 2.4.2).
