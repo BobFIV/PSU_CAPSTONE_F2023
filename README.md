@@ -72,7 +72,7 @@ For demo purposes, four programs run on the board:
 - BLE connection to 9160 DK (Accept software and photographs)
 - Train Control via GPIO pins
 - Reassemble image (photograph) from Bluetooth and show to external monitor
-- Image recognition (add GitHub link)
+- Image recognition from [Hackster.io](https://www.hackster.io/mjrobot/esp32-cam-tinyml-image-classification-fruits-vs-veggies-4ab970#toc-testing-the-model--inference-9)
 
 For more detail, see the [readme on Raspberry Pi](/RPi/readme.md).
 ### Django WebApp
