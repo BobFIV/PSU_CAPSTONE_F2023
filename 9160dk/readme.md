@@ -1,7 +1,7 @@
 # nRF9160: IPE PROGRAM
-Pennsylvania State University Fall 2023 Capstone Project
-
-Sponsored by Exacta Global Smart Solutions
+Pennsylvania State University Fall 2023 Capstone Project  
+Sponsored by Exacta Global Smart Solutions  
+  
 The Nordic Semicondutor nRF9160 Development Kit contains two systems on board: the nRF9160 SoC (main) and nRF52840 (board controller).  
 See the readme in each board for deeper explanation here:
 - [52840](hci_lpuart) runs the lower-levels of the BLE stack. Very few changes from the [original Nordic sample](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/samples/bluetooth/hci_lpuart/README.html)
@@ -18,12 +18,14 @@ You will need the following programs installed:
 - [CMake](https://cmake.org/download/)
 
 Ensure these programs are in your PATH variable.
+Items like Ninja that you will need for building can be used using ```pip``` after installing Python.
 #### Setting up the file directory
 1. After you've installed nRF Connect for Desktop, you'll find a directory called "nordicsemi" (or "ncs" by default) on your computer.
 2. Inside this "nordicsemi" directory, you'll see a subdirectory named after your nRF Connect version (e.g., "v2.4.2" for version 2.4.2).
-3. Within this version directory, you should create a new directory for your project, giving it a name that's easy for you to recognize. Let's call this directory "Capstone."
-4. The final path to your project directory would look something like this: ```C:\ncs\v2.4.2\zephyr\Capstone```.
-5. Copy the contents of this directory into that directory (i.e. transfer the IPE_OTA and hci_lpuart folders into the directory).
+3. Inside the version directory, a "zehpyr" directory should exist. Navigate into it.
+4. Within the zephyr directory, you should create a new directory for this project, giving it a name that's easy for you to recognize. Let's call this directory "Capstone".
+5. The final path to your project directory would look something like this: ```C:\ncs\v2.4.2\zephyr\Capstone```.
+6. Copy the contents of this directory into that directory (i.e. transfer the IPE_OTA and hci_lpuart folders into the directory).
 #### Building HCI_LPUART
 1. Open windows powershell. Navigate to the HCI_LPUART directory, such as ```cd C:\ncs\v2.4.2\zephyr\Capstone\hci_lpuart```
 2. Run west build with the version specified. For board version 1.1.0, it is the following: ```west build --board nrf9160dk_nrf52840@1.1.0```

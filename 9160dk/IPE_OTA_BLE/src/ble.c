@@ -30,10 +30,10 @@
 #include "main.h"
 
 
-#define NUS_WRITE_TIMEOUT K_MSEC(150)
-
+#define NUS_WRITE_TIMEOUT K_MSEC(50)
+static bool switchEnabled = false;
 static char* ESP32_device_name = "ESP32";
-static char* RaspberryPi_device_name = "RaspberryPi";
+static char* RPi_device_name = "RPi";
 static char* target_device_name;
 static struct bt_conn *default_conn;
 struct k_work_delayable periodic_switch_work;
@@ -44,7 +44,7 @@ struct k_mutex connect_mutex;
 static bool isConnecting = false;
 static char* connected_device_name;
 LOG_MODULE_DECLARE(lte_ble_gw);
-
+static int numConnectedDevices = 0;
 //BLE one-byte headers for BLE communication used in receiver.
 #define FIRMWARE_ERROR   0x01
 #define FIRMWARE_ACK     0x02
@@ -67,53 +67,43 @@ BT_CONN_CTX_DEF(ctx_lib, MAX_CONNECTED_DEVICES, sizeof(struct bt_nus_client));
 
 static uint8_t ble_data_received(struct bt_nus_client *nus, const uint8_t *data, uint16_t len);
 /*
-This function switches the device name that the BLE module is scanning for. Initially set to ESP32, it will swap over to the RaspberryPi after 10 seconds.
+This function switches the device name that the BLE module is scanning for. Initially set to ESP32, it will swap over to the RPi after 10 seconds.
 This uses the nordic work function to schedule a work item to be executed after a delay. It will stop scanning, change and update the filter, then begin
 scanning.
 Potential To-Do: Add a check to see if the device is already connected. If so, do not switch to that device (I.E. ESP32 connected, do not switch to ESP32).
 */
 static void switch_device_name(struct k_work *work) {
     struct k_work_delayable *dwork = CONTAINER_OF(work, struct k_work_delayable, work);
-
+    switchEnabled = true;
     const char *new_name;
-    if (strcmp(target_device_name, RaspberryPi_device_name) == 0) { //The current name is Raspbery Pi
+    if (numConnectedDevices == MAX_CONNECTED_DEVICES)
+    {
+        LOG_INF("Max number of devices connected.");
+        switchEnabled = false;
+        return;
+    }
+    if (strcmp(target_device_name, RPi_device_name) == 0) { //The current name is Raspbery Pi
         if (!ESP32Connected) 
         {
             new_name = ESP32_device_name;
-            led_condition &= ~CONDITION_ESP32_CONNECTED;
-            led_condition &= ~CONDITION_ESP32_CONNECTING;
-            led_condition &= ~CONDITION_RPI_SCANNING;
-            led_condition |= CONDITION_ESP32_SCANNING;
         } else
         {
             // If the ESP32 is connected, do not switch to it.
             // No need to swap between rPi and ESP32 either, so do not reschedule.
             LOG_INF("ESP32 is already connected, not switching device name.");
-            led_condition &= ~CONDITION_RPI_CONNECTED;
-            led_condition &= ~CONDITION_RPI_CONNECTING;
-            led_condition &= ~CONDITION_ESP32_SCANNING;
-            led_condition |= CONDITION_RPI_SCANNING;
             return; 
         }
         
     } else {
         if (!RPiConnected) 
         {
-            new_name = RaspberryPi_device_name;
-            led_condition &= ~CONDITION_RPI_CONNECTED;
-            led_condition &= ~CONDITION_RPI_CONNECTING;
-            led_condition &= ~CONDITION_ESP32_SCANNING;
-            led_condition |= CONDITION_RPI_SCANNING;
+            new_name = RPi_device_name;
         }
         else
         {
             // If the rPi is connected, do not switch to it.
             // No need to swap between rPi and ESP32 either, so do not reschedule.
             LOG_INF("Raspberry Pi is already connected, not switching device name.");
-            led_condition &= ~CONDITION_ESP32_CONNECTED;
-            led_condition &= ~CONDITION_ESP32_CONNECTING;
-            led_condition &= ~CONDITION_RPI_SCANNING;
-            led_condition |= CONDITION_ESP32_SCANNING;
             return;
         }
     }
@@ -144,7 +134,6 @@ static void switch_device_name(struct k_work *work) {
     k_work_reschedule(dwork, K_MSEC(10000));
 
 }
-
 /*
 Data Sent function. This is called when data is sent via BLE. It will release the semaphore that is used to block the thread until the data is sent.
 */
@@ -166,7 +155,7 @@ int ble_transmit(const char* target, uint8_t *data, uint16_t length) {
     err = k_sem_take(&nus_write_sem, NUS_WRITE_TIMEOUT);
     if (err)
     {
-    LOG_WRN("NUS send timeout");
+        LOG_WRN("NUS send timeout");
     }
     if (!data || !length) {
         return -EINVAL;
@@ -210,6 +199,7 @@ It also maps the device to the table to get the device ID in the nus context lib
 */
 static void discovery_completed(struct bt_gatt_dm *dm, void *context)
 {
+    int err = 0;
     LOG_INF("Service discovery completed");
     struct bt_nus_client *nus = context; //bt_conn_ctx_alloc(&ctx_lib_ctx_lib, context);
         if (!nus) {
@@ -227,13 +217,6 @@ static void discovery_completed(struct bt_gatt_dm *dm, void *context)
     bt_gatt_dm_data_release(dm);
     LOG_INF("Grabbing the number of connections");
 
-    int err = bt_scan_start(BT_SCAN_TYPE_SCAN_ACTIVE);
-	if (err) {
-		LOG_ERR("Scanning failed to start (err %d)", err);
-	} else {
-		LOG_INF("Scanning started");
-	}
-
     size_t num_nus_conns = bt_conn_ctx_count(&ctx_lib_ctx_lib);
     LOG_INF("Calculating the index for this connection.");
     size_t nus_index = 99;
@@ -241,13 +224,12 @@ static void discovery_completed(struct bt_gatt_dm *dm, void *context)
     // So we have to iterate through the context library to find the device that matches the nus client we just discovered.
     // Then, we map that device to the table so we can pick the device using the name when we send data later.
     // We compare the target device name to the device we are scanning for, and set it to that in our table.  (if we switch during this function we're in big trouble)
-    k_mutex_lock(&connect_mutex, K_FOREVER);
     for (size_t i = 0; i < num_nus_conns; i++) {
 		const struct bt_conn_ctx *ctx = bt_conn_ctx_get_by_id(&ctx_lib_ctx_lib, i);
 		if (ctx) {
 			if (ctx->data == nus) {
 				nus_index = i;
-                //const char *device_name = (strcmp(connected_device_name, "RaspberryPi") == 0) ? "RaspberryPi" : "ESP32";
+                //const char *device_name = (strcmp(connected_device_name, "RPi") == 0) ? "RPi" : "ESP32";
                 strncpy(device_maps[nus_index].device_name, connected_device_name, sizeof(device_maps[nus_index].device_name));
                 device_maps[nus_index].id = nus_index;
                 
@@ -258,39 +240,95 @@ static void discovery_completed(struct bt_gatt_dm *dm, void *context)
                     LOG_INF("Data sent successfully");
                 }
                 bt_conn_ctx_release(&ctx_lib_ctx_lib, (void *) ctx->data);
-                if (strcmp(connected_device_name, "RaspberryPi") == 0) {
-                    LOG_INF("RaspberryPi connected");
+                if (strcmp(connected_device_name, "RPi") == 0) {
+                    LOG_INF("RPi connected");
                     RPiConnected = true;
                     led_condition &= ~CONDITION_RPI_CONNECTING;
-                    led_condition |= ~CONDITION_RPI_CONNECTED;
+                    led_condition |= CONDITION_RPI_CONNECTED;
+                    struct downlink_data_packet packet;
+                    packet.type = downlink_TEXT;
+                    strncpy(packet.data, "rpiConnected", ENTRY_MAX_SIZE - 1);
+                    packet.data[ENTRY_MAX_SIZE - 1] = '\0'; // Ensure null termination
+                    packet.length = strlen(packet.data);
+                    packet.destination = DESTINATION_ESP32;
+                    downlink_aggregator_put(packet);
                 } else {
                     LOG_INF("ESP32 connected");
                     ESP32Connected = true;
                     led_condition &= ~CONDITION_ESP32_CONNECTING;
-                    led_condition |= ~CONDITION_ESP32_CONNECTED;
+                    led_condition |= CONDITION_ESP32_CONNECTED;
+                    if (RPiConnected == true)
+                    {
+                        struct downlink_data_packet packet;
+                        packet.type = downlink_TEXT;
+                        strncpy(packet.data, "rpiConnected", ENTRY_MAX_SIZE - 1);
+                        packet.data[ENTRY_MAX_SIZE - 1] = '\0'; // Ensure null termination
+                        packet.length = strlen(packet.data);
+                        packet.destination = DESTINATION_ESP32;
+                        downlink_aggregator_put(packet);
+                    }               
                 }
 				break;
 			}
+            else {
+                bt_conn_ctx_release(&ctx_lib_ctx_lib, (void *) ctx->data);
+            }
 		} else {
             LOG_ERR("No context found for connection");
             bt_conn_ctx_release(&ctx_lib_ctx_lib, (void *) ctx->data);
         }
 	}
+    numConnectedDevices++;
+    if (numConnectedDevices == MAX_CONNECTED_DEVICES)
+    {
+        LOG_INF("Max number of devices connected."); 
+        switchEnabled = false;
+    } else if (ESP32Connected == false && RPiConnected == true){
+        bt_scan_filter_remove_all();
+        int err = bt_scan_filter_add(BT_SCAN_FILTER_TYPE_NAME, ESP32_device_name);
+        if (err) {
+            LOG_ERR("Scanning filters for %s service cannot be set", ESP32_device_name);
+            return;
+        }
+        err = bt_scan_start(BT_SCAN_TYPE_SCAN_ACTIVE);
+        if (err) {
+            LOG_ERR("Scanning failed to start (err %d)", err);
+        } else {
+            LOG_INF("Scanning started");
+        }
+    } else if(ESP32Connected == true && RPiConnected == false) {
+        bt_scan_filter_remove_all();
+        int err = bt_scan_filter_add(BT_SCAN_FILTER_TYPE_NAME, RPi_device_name);
+        if (err) {
+            LOG_ERR("Scanning filters for %s service cannot be set", RPi_device_name);
+            return;
+        }
+        err = bt_scan_start(BT_SCAN_TYPE_SCAN_ACTIVE);
+        if (err) {
+            LOG_ERR("Scanning failed to start (err %d)", err);
+        } else {
+            LOG_INF("Scanning started");
+        }
+    }
     isConnecting = false;
     k_mutex_unlock(&connect_mutex);
     LOG_INF("Donezo.");
 
 }
 
-
 static void discovery_service_not_found(struct bt_conn *conn, void *context)
 {
 	LOG_ERR("Service not found");
+    isConnecting = false;
+    k_mutex_unlock(&connect_mutex);
 }
 
 static void discovery_error(struct bt_conn *conn, int err, void *context)
 {
 	LOG_WRN("Error while discovering GATT database: (%d)", err);
+    isConnecting = false;
+    k_mutex_unlock(&connect_mutex);
+    
 }
 
 struct bt_gatt_dm_cb discovery_cb = {
@@ -332,16 +370,17 @@ static void exchange_func(struct bt_conn *conn, uint8_t err, struct bt_gatt_exch
 	}
 }
 
+
+
 static void connected(struct bt_conn *conn, uint8_t conn_err) {
     char addr[BT_ADDR_LE_STR_LEN];
     int err;
     k_mutex_lock(&connect_mutex, K_FOREVER);
     isConnecting = true;
-    connected_device_name = (strcmp(target_device_name, "RaspberryPi") == 0) ? "RaspberryPi" : "ESP32";
-    k_mutex_unlock(&connect_mutex);
+    connected_device_name = (strcmp(target_device_name, "RPi") == 0) ? "RPi" : "ESP32";
     
-    if (strcmp(connected_device_name, "RaspberryPi") == 0)  {
-        LOG_INF("RaspberryPi found");
+    if (strcmp(connected_device_name, "RPi") == 0)  {
+        LOG_INF("RPi found");
         led_condition &= ~CONDITION_RPI_SCANNING;
         led_condition |= CONDITION_RPI_CONNECTING;
     } else {
@@ -431,7 +470,6 @@ static void connected(struct bt_conn *conn, uint8_t conn_err) {
 	}
     //default_conn = conn;
     error:
-        k_mutex_lock(&connect_mutex, K_FOREVER);
         isConnecting = false;
         k_mutex_unlock(&connect_mutex);
         return;
@@ -442,7 +480,6 @@ static void disconnected(struct bt_conn *conn, uint8_t reason) {
     bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
     LOG_INF("Disconnected: %s, Reason: %u", addr, reason);
     
-    bool should_reschedule = false;
     // Removing connection from device maps and updating flags
     for (int i = 0; i < MAX_CONNECTED_DEVICES; i++) {
         if (device_maps[i].id != -1) {
@@ -450,21 +487,26 @@ static void disconnected(struct bt_conn *conn, uint8_t reason) {
             if (existing_conn) {
                 struct bt_nus_client *existing_nus_client = bt_conn_ctx_get(&ctx_lib_ctx_lib, existing_conn);
                 if (existing_nus_client) {
-                    if (strcmp(device_maps[i].device_name, "RaspberryPi") == 0) {
+                    if (strcmp(device_maps[i].device_name, "RPi") == 0) {
                         RPiConnected = false;
                         led_condition &= ~CONDITION_RPI_CONNECTED;
-                        should_reschedule = true;
+                        struct downlink_data_packet packet;
+                        packet.type = downlink_TEXT;
+                        strncpy(packet.data, "rpiDisconnected", ENTRY_MAX_SIZE - 1);
+                        packet.data[ENTRY_MAX_SIZE - 1] = '\0'; // Ensure null termination
+                        packet.length = strlen(packet.data);
+                        packet.destination = DESTINATION_ESP32;
+                        downlink_aggregator_put(packet);
                     } else if (strcmp(device_maps[i].device_name, "ESP32") == 0) {
                         ESP32Connected = false;
                         led_condition &= ~CONDITION_ESP32_CONNECTED;
-                        should_reschedule = true;
                     }
                     device_maps[i].device_name[0] = '\0'; // Clearing the device name
                     device_maps[i].id = -1; // Resetting the id
-                    bt_conn_unref(existing_conn);
+                    //bt_conn_unref(existing_conn);
                     break;
                 }
-                bt_conn_unref(existing_conn);
+                //bt_conn_unref(existing_conn);
             }
         }
     }
@@ -476,10 +518,33 @@ static void disconnected(struct bt_conn *conn, uint8_t reason) {
 
     bt_conn_unref(conn);
     default_conn = NULL;
-
-    // Reschedule the work if a device was disconnected
-    if (should_reschedule) {
+    numConnectedDevices--;
+    if (RPiConnected == false && ESP32Connected == false && switchEnabled == false) {   //not initial state, both devices disconnected.
         k_work_reschedule(&periodic_switch_work, K_NO_WAIT);
+    } else if (RPiConnected == false && ESP32Connected == true) {
+        bt_scan_filter_remove_all();
+        int err = bt_scan_filter_add(BT_SCAN_FILTER_TYPE_NAME, RPi_device_name);
+        if (err) {
+            LOG_ERR("Scanning filters for %s service cannot be set", RPi_device_name);
+            return;
+        }
+        err = bt_scan_start(BT_SCAN_TYPE_SCAN_ACTIVE);
+        if (err) {
+            LOG_ERR("Scanning failed to start, err %d", err);
+            return;
+        }
+    } else if (RPiConnected == true && ESP32Connected == false) {
+        bt_scan_filter_remove_all();
+        int err = bt_scan_filter_add(BT_SCAN_FILTER_TYPE_NAME, ESP32_device_name);
+        if (err) {
+            LOG_ERR("Scanning filters for %s service cannot be set", ESP32_device_name);
+            return;
+        }
+        err = bt_scan_start(BT_SCAN_TYPE_SCAN_ACTIVE);
+        if (err) {
+            LOG_ERR("Scanning failed to start, err %d", err);
+            return;
+        }
     }
 }
 
@@ -554,7 +619,7 @@ static int scan_init(void) {
         LOG_ERR("Failed to allocate memory for target_device_name");
         return -ENOMEM; // or another appropriate error code
     } 
-    char * default_target_name = "ESP32";
+    char * default_target_name = "RPi";
     strncpy(target_device_name, default_target_name, 30); //initailize to the ESP32.
     connected_device_name = k_malloc(30);
     if (!connected_device_name) {
@@ -582,7 +647,6 @@ static int scan_init(void) {
     k_work_init_delayable(&periodic_switch_work, switch_device_name);
     k_work_schedule(&periodic_switch_work, K_MSEC(10000)); // Switch scan target every 10 seconds if nothing found.
     
-
 	return err;
 
 }
@@ -634,8 +698,8 @@ static uint8_t ble_data_received(struct bt_nus_client *nus, const uint8_t *data,
     //Handles data received via Bluetooth.
     /*
     Data consists of:
-    1. Firmware error messages from a device to respective topic in MQTT (/ESP32/Update or /RaspberryPi/Update)
-    2. Firmware Update Ready (ACK) messages from a device to respective topic in MQTT (/ESP32/Update or /RaspberryPi/Update)
+    1. Firmware error messages from a device to respective topic in MQTT (/ESP32/Update or /RPi/Update)
+    2. Firmware Update Ready (ACK) messages from a device to respective topic in MQTT (/ESP32/Update or /RPi/Update)
     3. Firmware versions from initial connection on each device. This will be package in oneM2M and sent as an UPDATE call to the ACME CSE.
     4. Images going from ESP32 to rPI
     5. Location of the train from the rPI to Django
@@ -645,19 +709,27 @@ static uint8_t ble_data_received(struct bt_nus_client *nus, const uint8_t *data,
     #define IMAGE            0x04
     #define TRAIN_LOCATION   0x05
     */
+
     ARG_UNUSED(nus);
 
     LOG_INF("Data received via NUS...");
     if (len > 0) {
         LOG_HEXDUMP_INF(data, len, "Received data:");
         int err = 0;
-        // Check the first byte to determine the data type
-        uint8_t data_type = data[0];
+
+        // Convert the first two ASCII characters to a number for the data type
+        uint8_t data_type;
+        if (data[0] >= '0' && data[0] <= '9' && data[1] >= '0' && data[1] <= '9') {
+            data_type = (data[0] - '0') * 10 + (data[1] - '0');
+        } else {
+            LOG_ERR("Invalid data type format");
+            return BT_GATT_ITER_STOP;
+        }
         struct uplink_data_packet data_packet;
-        data_packet.source = SOURCE_ESP32; // This is just a placeholder. 
-        //#TO-DO The source will be determined by the device name 
-        data_packet.length = MIN(len - 1, ENTRY_MAX_SIZE); // Subtract 1 to exclude the header
-        memcpy(data_packet.data, data + 1, data_packet.length); // Start copying from data + 1
+        data_packet.source = SOURCE_ESP32;
+        data_packet.length = MIN(len - 2, ENTRY_MAX_SIZE); // Subtract 2 to exclude the ASCII header
+        memcpy(data_packet.data, data + 2, data_packet.length); // Start copying from data + 2
+
         switch (data_type) {
             case FIRMWARE_ERROR:
                 data_packet.type = uplink_FIRMWARE_ERROR;
@@ -681,12 +753,11 @@ static uint8_t ble_data_received(struct bt_nus_client *nus, const uint8_t *data,
                 }
                 break;
             case IMAGE:
-                //transfer_image_to_rpi(data + 1, len - 1);               //This must be resent over BLE to the rPI.
                 struct downlink_data_packet dl_data_packet;
                 dl_data_packet.type = downlink_IMAGE;
                 dl_data_packet.destination = DESTINATION_RaspberryPi;
-                dl_data_packet.length = MIN(len - 1, ENTRY_MAX_SIZE); // Subtract 1 to exclude the header
-                memcpy(dl_data_packet.data, data + 1, dl_data_packet.length); // Start copying from data + 1
+                dl_data_packet.length = MIN(len - 2, ENTRY_MAX_SIZE); // Use the same length calculation as for the uplink packet
+                memcpy(dl_data_packet.data, data + 2, dl_data_packet.length); // Start copying from data + 2
                 err = downlink_aggregator_put(dl_data_packet);
                 if (err) {
                     LOG_ERR("Failed to put data into aggregator, err %d", err);
@@ -703,12 +774,14 @@ static uint8_t ble_data_received(struct bt_nus_client *nus, const uint8_t *data,
                 LOG_ERR("Unknown data type received: %d", data_type);
                 break;
         }
+        
     } else {
         LOG_DBG("Notification with 0 length");
     }
 
     return BT_GATT_ITER_CONTINUE;
 }
+
 
 int ble_init(void)
 {

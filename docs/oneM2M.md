@@ -1,6 +1,7 @@
+# oneM2M Device Managment
 See the official oneM2M website [here](https://www.onem2m.org/) 
 
-oneM2M is a global standard that aims to create a common and interoperable framework for the Internet of Things (IoT) and machine-to-machine (M2M) communications. It provides a standardized and open architecture that enables different IoT and M2M devices and systems to seamless communicate and exchange information, regardless of the underlying technology or network.
+oneM2M is a global standard that aims to create a common and interoperable framework for the Internet of Things (IoT) and machine-to-machine (M2M) communications. It provides a standardized and open architecture that enables different IoT and M2M devices and systems to seamlessly communicate and exchange information, regardless of the underlying technology or network.
 
 ## High Level Architecture
 Our network is comprised of oneM2M devices as well as non-oneM2M devices, linked into the system via an Interworking Proxy Entity (IPE). The nRF-9160DK acts as the IPE, linking two non-oneM2M devices into the system: the Raspberry Pi and ESP32. The oneM2M flowchart is shown in Figure 1.
@@ -18,8 +19,8 @@ The Django Webapp is an AE capable of initiating firmware updates. It will do so
 ### Nodes
 In oneM2M, Nodes generally represent devices in the system. For example, if an Amazon Web Services EC2 instance was hosting our ACME CSE, the EC2 instance is the Node. 
 Our project follows this approach. The Nodes used in our network are the following:
-#### Infrastructure Node (IN)
-An Infrastructure Node is defined as a Node that contains one CSE and contains zero or more AEs. INs typically serve as the central or code nodes within the oneM2M infrastructure domain. The EC2 Instance hosting the ACME CSE is considered an IN.
+#### Middle Node (MN)
+A Middle Node is defined as a Node that contains one CSE and contains zero or more AEs. In our system, we consider the ACME CSE to be hosted on a Middle Node. Although within the scope of oneM2M, we can consider the ACME CSE to be hosted on an Infrastructure Node (IN) instead, if this system were to be deployed on a large scale, for each deployment to have complete separation of data as an IN would rewuire accessControlPolicies (ACPs). Since we are not using ACPs, we consider the ACME CSE to be hosted on a MN.
 #### Application Dedicated Node (ADN)
 An Application Dedicated Node is defined as a Node which contains at least one AE but zero CSEs. The sole feature of these nodes are to host AEs, communicating over Mca references with a CSE residing in a MN or in an IN.
 Our network has two ADNs: The host system of the Django WebApp (currently locally hosted, plans to move to an EC2 instance) and the nrF-9160 DK.

@@ -308,60 +308,25 @@ void publish_aggregated_data(struct k_work *work) {
     k_work_reschedule(dwork, K_MSEC(100));
 }
 
-char *create_json_message_for_ble(const struct downlink_data_packet *packet) {
-    if (!packet) {
-        return NULL;
-    }
-
-    cJSON *root = cJSON_CreateObject();
-    if (!root) {
-        // Handle error
-        return NULL;
-    }
-
-    switch (packet->type) {
-        case FIRMWARE_UPDATE:
-            cJSON_AddNumberToObject(root, "I", packet->chunk_id); // Assuming chunk_id is a field in your struct
-            cJSON_AddStringToObject(root, "D", packet->data);
-            char checksumStr[20]; // Make sure this buffer is large enough to hold the checksum as a string
-            snprintf(checksumStr, sizeof(checksumStr), "%u", packet->checksum);
-            cJSON_AddStringToObject(root, "C", checksumStr);
-            break;
-        case downlink_TEXT:
-            cJSON_AddStringToObject(root, "Message", packet->data);
-            break;
-        default:
-            cJSON_Delete(root);
-            return NULL;
-    }
-
-    char *json_string = cJSON_PrintUnformatted(root);
-    cJSON_Delete(root);
-    return json_string; // Remember to free this string after use
-}
-
-
 void transmit_aggregated_data(struct k_work *work) {
     struct k_work_delayable *dwork = CONTAINER_OF(work, struct k_work_delayable, work);
 
     struct downlink_data_packet packet;
     while (downlink_aggregator_get(&packet) == 0) {
-        char *json_message = create_json_message_for_ble(&packet);
         
-        if (json_message == NULL) {
-            LOG_ERR("Failed to create JSON message");
+        if (packet.length == 0) {
+            LOG_ERR("No data to transmit or data length is zero");
             continue;
         }
+
         if (packet.destination == DESTINATION_ESP32){
-            ble_transmit("ESP32", (uint8_t *)json_message, strlen(json_message));
+            ble_transmit("ESP32", packet.data, packet.length);
         } else if (packet.destination == DESTINATION_RaspberryPi) {
-            ble_transmit("RaspberryPi", (uint8_t *)json_message, strlen(json_message));
+            ble_transmit("RPi", packet.data, packet.length);
         } else {
             LOG_ERR("Unknown destination");
             continue;
         }
-
-        free(json_message);
     }
 
     k_work_reschedule(dwork, K_MSEC(100));
