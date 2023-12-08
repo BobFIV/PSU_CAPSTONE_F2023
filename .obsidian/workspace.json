@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/oneM2M.md",
+                "file": "docs/demo.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "docs/oneM2M.md",
+                "file": "docs/demo.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "docs/oneM2M.md",
+                "file": "docs/demo.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "docs/oneM2M.md"
+                "file": "docs/demo.md"
               }
             }
           }
@@ -148,6 +148,11 @@
   },
   "active": "52aabbc6d7fc3a36",
   "lastOpenFiles": [
+    "9160dk/IPE_OTA_BLE/src/oneM2Mmessages.h",
+    "9160dk/IPE_OTA_BLE/src/oneM2Mmessages.c",
+    "9160dk/IPE_OTA_BLE/src/oneM2Mmqtt.c",
+    "docs/RpiUpdate.md",
+    "docs/oneM2M.md",
     "9160dk/IPE_OTA_BLE/build/tfm/secure_fw/partitions/crypto/mbedcrypto/nrf_security_src/CMakeFiles/crypto_service_mbedcrypto.dir/C_/ncs/v2.4.2/nrfxlib/crypto/nrf_oberon/core/oberon/drivers/oberon_rsa.o",
     "9160dk/IPE_OTA_BLE/build/tfm/secure_fw/partitions/crypto/mbedcrypto/nrf_security_src/CMakeFiles/crypto_service_mbedcrypto.dir/C_/ncs/v2.4.2/nrfxlib/crypto/nrf_oberon/core/oberon/drivers/oberon_mac.o",
     "9160dk/IPE_OTA_BLE/build/tfm/secure_fw/partitions/crypto/mbedcrypto/nrf_security_src/CMakeFiles/crypto_service_mbedcrypto.dir/C_/ncs/v2.4.2/nrfxlib/crypto/nrf_oberon/core/oberon/drivers/oberon_key_pair.o",
@@ -156,16 +161,11 @@
     "9160dk/IPE_OTA_BLE/build/tfm/secure_fw/partitions/crypto/mbedcrypto/nrf_security_src/CMakeFiles/crypto_service_mbedcrypto.dir/C_/ncs/v2.4.2/nrfxlib/crypto/nrf_oberon/core/oberon/drivers/oberon_helpers.o",
     "9160dk/IPE_OTA_BLE/build/tfm/secure_fw/partitions/crypto/mbedcrypto/nrf_security_src/CMakeFiles/crypto_service_mbedcrypto.dir/C_/ncs/v2.4.2/nrfxlib/crypto/nrf_oberon/core/oberon/drivers/oberon_ecdsa.o",
     "9160dk/IPE_OTA_BLE/build/tfm/secure_fw/partitions/crypto/mbedcrypto/nrf_security_src/CMakeFiles/crypto_service_mbedcrypto.dir/C_/ncs/v2.4.2/nrfxlib/crypto/nrf_oberon/core/oberon/drivers/oberon_cipher.o",
-    "9160dk/IPE_OTA_BLE/build/tfm/secure_fw/partitions/crypto/mbedcrypto/nrf_security_src/CMakeFiles/crypto_service_mbedcrypto.dir/C_/ncs/v2.4.2/nrfxlib/crypto/nrf_oberon/core/oberon/drivers/oberon_ecdh.o",
-    "9160dk/IPE_OTA_BLE/build/tfm/secure_fw/partitions/crypto/mbedcrypto/nrf_security_src/CMakeFiles/crypto_service_mbedcrypto.dir/C_/ncs/v2.4.2/nrfxlib/crypto/nrf_oberon/core/oberon/drivers/oberon_aead.o",
-    "9160dk/IPE_OTA_BLE/build/tfm/secure_fw/partitions/crypto/mbedcrypto/nrf_security_src/CMakeFiles/crypto_service_mbedcrypto.dir/C_/ncs/v2.4.2/nrfxlib/crypto/nrf_oberon/core/library/psa_crypto_storage.o",
     "9160dk/IPE_OTA_BLE/readme.md",
     "images/oneM2MESP32UpdateComplete.png",
-    "docs/oneM2M.md",
     "images/oneM2MESP32UpdateComplete 1.png",
     "docs/firmwareUpdate.md",
     "docs/ESP32Update.md",
-    "docs/RpiUpdate.md",
     "docs/Bluetooth.md",
     "docs/demo.md",
     "images/ESP32oneM2MUpdate.png",

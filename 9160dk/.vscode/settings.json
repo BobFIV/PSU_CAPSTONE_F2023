@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "mqtt_connection.h": "c",
+        "onem2mmessages.h": "c"
+    }
+}

@@ -30,8 +30,8 @@ enum uplink_data_packet_type {						//Data types for going up are text and image
 	uplink_FIRMWARE_ERROR,
     uplink_FIRMWARE_ACK,
     uplink_FIRMWARE_VERSION,
-    //uplink_IMAGE,
     uplink_TRAIN_LOCATION,
+	uplink_oneM2M_JSON,
 };
 enum ble_source {
 	SOURCE_ESP32,

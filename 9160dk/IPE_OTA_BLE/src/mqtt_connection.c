@@ -373,7 +373,6 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 					cJSON_AddStringToObject(response_json, "rqi", rqi->valuestring);
 					cJSON_AddStringToObject(response_json, "ot", ot ? ot->valuestring : "");
 					cJSON_AddNumberToObject(response_json, "rsc", 2001); // Response Status Code
-					// Add additional fields to the response as needed
 
 					char *response_str = cJSON_PrintUnformatted(response_json);
 					if (response_str) {

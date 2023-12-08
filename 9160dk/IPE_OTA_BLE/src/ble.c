@@ -28,6 +28,7 @@
 #include "aggregator.h"
 #include "ble.h"
 #include "main.h"
+#include "oneM2Mmessages.h"
 
 
 #define NUS_WRITE_TIMEOUT K_MSEC(50)
@@ -252,6 +253,7 @@ static void discovery_completed(struct bt_gatt_dm *dm, void *context)
                     packet.length = strlen(packet.data);
                     packet.destination = DESTINATION_ESP32;
                     downlink_aggregator_put(packet);
+                    updateFlexContainerForConnectedDevice("RPi", true);
                 } else {
                     LOG_INF("ESP32 connected");
                     ESP32Connected = true;
@@ -266,7 +268,8 @@ static void discovery_completed(struct bt_gatt_dm *dm, void *context)
                         packet.length = strlen(packet.data);
                         packet.destination = DESTINATION_ESP32;
                         downlink_aggregator_put(packet);
-                    }               
+                    }
+                    updateFlexContainerForConnectedDevice("ESP32", true);               
                 }
 				break;
 			}
@@ -497,9 +500,11 @@ static void disconnected(struct bt_conn *conn, uint8_t reason) {
                         packet.length = strlen(packet.data);
                         packet.destination = DESTINATION_ESP32;
                         downlink_aggregator_put(packet);
+                        updateFlexContainerForConnectedDevice("RPi", false);
                     } else if (strcmp(device_maps[i].device_name, "ESP32") == 0) {
                         ESP32Connected = false;
                         led_condition &= ~CONDITION_ESP32_CONNECTED;
+                        updateFlexContainerForConnectedDevice("ESP32", false);
                     }
                     device_maps[i].device_name[0] = '\0'; // Clearing the device name
                     device_maps[i].id = -1; // Resetting the id

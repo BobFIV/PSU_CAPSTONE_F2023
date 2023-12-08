@@ -45,13 +45,8 @@ Using these connections, it accomplishes the following:
 - **LED 1** blinking: The device is connecting to the ESP32.
 - **LED 1** lit: The device is connected to the ESP32.
 - **LED 2** blinking: The device is connecting to the Raspberry Pi
-<<<<<<< HEAD
 - **LED 2** lit: The device is connected to the Raspberry Pi
 **LED 3** and **LED 4**:
-=======
-- **LED 2** lit: The device is connected to the Raspberry Pi  
-### **LED 3** and **LED 4** reflect LTE and MQTT connections:  
->>>>>>> 33ec8644aaed45b44ec5f1504e596dc41632ea0f
 - **LED 3** blinking: The device is connecting to the LTE network.
 - **LED 3** lit: The device is connected to the LTE network.
 - **LED 4** blinking: The device is receiving a firmware update over MQTT.
