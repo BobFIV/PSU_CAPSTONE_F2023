@@ -21,13 +21,16 @@
 #include <modem/nrf_modem_lib.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/net/mqtt.h>
+#include <stdbool.h>
 
 
 #include "mqtt_connection.h"
 #include "ble.h"
 #include "aggregator.h"
 #include "update.h"
+#include "oneM2Mmessages.h"
 #include "main.h"
+
 
 
 
@@ -313,6 +316,9 @@ int main(void)
 		LOG_ERR("Failed to initialize MQTT client: %d", err);
 		return 0;
 	}
+	//updating the flex container for 9160.
+	updateFlexContainerForConnectedDevice("9160", true);
+	
 	work_init();		//Initalize work: Uplink Aggregator publish, Downlink transmit and LED functions.
 	err = ble_init();		    //Initializes bluetooth (ble.c)
 	if (err) {

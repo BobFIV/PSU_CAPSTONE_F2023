@@ -2,5 +2,8 @@
     "files.associations": {
         "mqtt_connection.h": "c",
         "onem2mmessages.h": "c"
-    }
+    },
+    "nrf-connect.applications": [
+        "${workspaceFolder}\\IPE_OTA_BLE"
+    ]
 }

@@ -2,8 +2,8 @@
 #define oneM2MMessages_h
 
 #include "cJSON.h"
-cJSON* createSubscribeMessage();
+int createSubscribeMessage();
 
-cJSON* updateFlexContainerForConnectedDevice(const char *deviceType, bool connected);
+int updateFlexContainerForConnectedDevice(const char *deviceType, bool connected);
 
 #endif /* oneM2MMessages_h */

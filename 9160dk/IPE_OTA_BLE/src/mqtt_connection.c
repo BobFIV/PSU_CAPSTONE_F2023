@@ -30,6 +30,27 @@ static struct sockaddr_storage broker;
 
 LOG_MODULE_DECLARE(lte_ble_gw);
 
+
+char* strdup(const char* s) {
+    char* new_str = malloc(strlen(s) + 1);
+    if (new_str) {
+        strcpy(new_str, s);
+    }
+    return new_str;
+}
+
+typedef struct {
+    char *deviceName;
+    char *deviceUpdateVersion;
+    long totalUpdateSize;
+    int chunkSize;
+    int totalChunks;
+    char *url;
+} PackageInfo;
+
+
+void freePackageInfo(PackageInfo *info);
+
 /**@brief Function to get the payload of recived data.
  */
 static int get_received_payload(struct mqtt_client *c, size_t length)
@@ -93,6 +114,13 @@ static int subscribe(struct mqtt_client *const c)
             .topic = {
                 .utf8 = "/RaspberryPi/Update", // Subscribes to the RaspberryPi Update topic
                 .size = strlen("/RaspberryPi/Update")
+            },
+            .qos = MQTT_QOS_1_AT_LEAST_ONCE
+        },
+		{
+            .topic = {
+                .utf8 = "/oneM2M/req/capstone-iot/Notif", // Subscribes to the oneM2M notification topic
+                .size = strlen("/oneM2M/req/capstone-iot/Notif")
             },
             .qos = MQTT_QOS_1_AT_LEAST_ONCE
         },
@@ -308,6 +336,118 @@ int chunkErrorChecker(struct mqtt_client *mqtt_client, const char *topic, int re
     return -1;
 }
 
+
+
+PackageInfo* extractPackage(const char *jsonString)
+{
+    // Parse the JSON string
+    cJSON *root = cJSON_Parse(jsonString);
+    if (root == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            fprintf(stderr, "Error before: %s\n", error_ptr);
+        }
+        return NULL;
+    }
+
+    PackageInfo *info = malloc(sizeof(PackageInfo));
+    if (info == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        cJSON_Delete(root);
+        return NULL;
+    }
+
+    cJSON *pc = cJSON_GetObjectItemCaseSensitive(root, "pc");
+    cJSON *sgn = pc ? cJSON_GetObjectItemCaseSensitive(pc, "m2m:sgn") : NULL;
+    cJSON *nev = sgn ? cJSON_GetObjectItemCaseSensitive(sgn, "nev") : NULL;
+    cJSON *rep = nev ? cJSON_GetObjectItemCaseSensitive(nev, "rep") : NULL;
+    cJSON *dmPae = rep ? cJSON_GetObjectItemCaseSensitive(rep, "mad:dmPae") : NULL;
+
+    if (dmPae) {
+        cJSON *name = cJSON_GetObjectItemCaseSensitive(dmPae, "name");
+        cJSON *url = cJSON_GetObjectItemCaseSensitive(dmPae, "url");
+
+        if (name && cJSON_IsString(name) && (name->valuestring != NULL)) {
+            char *token;
+            char *nameStr = strdup(name->valuestring);
+
+            // Extract deviceName
+			token = strtok(nameStr, " :");
+			info->deviceName = token ? strdup(token) : NULL;
+
+
+			char *version = strtok(NULL, " :");
+			char *totalSizeStr = strtok(NULL, " :");
+			char *chunkSizeStr = strtok(NULL, " :");
+			char *totalChunksStr = strtok(NULL, " :");
+
+
+			int totalChunks = totalChunksStr ? atoi(totalChunksStr) : 0;
+
+			info->deviceUpdateVersion = version ? strdup(version) : NULL;
+			info->totalUpdateSize = totalSizeStr ? strtol(totalSizeStr, NULL, 10) : 0;
+			info->chunkSize = chunkSizeStr ? atoi(chunkSizeStr) : 0;
+			info->totalChunks = totalChunksStr ? atoi(totalChunksStr) : 0;
+
+
+            // Set flags and chunks based on the device name
+            if (token && strcmp(token, "rpi") == 0) {
+                if (updateRPiFlag) {
+                    LOG_ERR("RaspberryPi is already updating");
+                    freePackageInfo(info);
+                    cJSON_Delete(root);
+                    return NULL;
+                }
+                totalRPiChunks = totalChunks;
+                updateRPiFlag = true;
+            } else if (token && strcmp(token, "esp32") == 0) {
+                if (updateESP32Flag) {
+                    LOG_ERR("ESP32 is already updating");
+                    freePackageInfo(info);
+                    cJSON_Delete(root);
+                    return NULL;
+                }
+                totalESP32Chunks = totalChunks;
+                updateESP32Flag = true;
+            } else if (token && strcmp(token, "9160") == 0) {
+                if (update9160Flag) {
+                    LOG_ERR("9160 is already updating");
+                    freePackageInfo(info);
+                    cJSON_Delete(root);
+                    return NULL;
+                }
+                total9160Chunks = totalChunks;
+                update9160Flag = true;
+            } else {
+                LOG_ERR("Invalid device name");
+                freePackageInfo(info);
+                cJSON_Delete(root);
+                return NULL;
+            }
+            free(nameStr);
+        }
+
+        // Extract the 'url' field
+        if (url && cJSON_IsString(url) && (url->valuestring != NULL)) {
+            info->url = strdup(url->valuestring);
+        }
+    }
+
+    cJSON_Delete(root);
+    return info; // The caller is responsible for freeing this memory
+}
+
+void freePackageInfo(PackageInfo *info) {
+    if (info != NULL) {
+        free(info->deviceName);
+        free(info->deviceUpdateVersion);
+        free(info->url);
+        free(info);
+    }
+}
+
+
+
 /**@brief MQTT client event handler
  */
 void mqtt_evt_handler(struct mqtt_client *const c,
@@ -404,8 +544,8 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 			} else {
 				LOG_ERR("Failed to extract payload: %d", err);
 			}
-   		}
-		// Check for the type of message
+   		} 		// Check for the type of message
+		/*
 		if (cJSON_HasObjectItem(json_payload, "Total Update Chunks")) { //In this case its a message regarding update.
 			cJSON *total_chunks = cJSON_GetObjectItem(json_payload, "Total Update Chunks");
 			cJSON *total_size = cJSON_GetObjectItem(json_payload, "Total Size");
@@ -471,6 +611,32 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 			
 			downlink_aggregator_put(packet);
 			cJSON_Delete(json_payload);
+		*/else if (strncmp(p->message.topic.topic.utf8, "/oneM2M/req/capstone-iot/Notif", p->message.topic.topic.size) == 0){	//if the message is in the NOTIFY topic for the oneM2M subscription
+			PackageInfo *pkgInfo = extractPackage(payload_buf);
+			if (pkgInfo == NULL) {
+				fprintf(stderr, "Failed to extract package info\n");
+				return;
+			}
+			struct downlink_data_packet packet;
+			memset(&packet, 0, sizeof(packet)); // Initialize to zero
+			if (strcmp(pkgInfo->deviceName, "esp32") == 0) {
+				packet.destination = DESTINATION_ESP32;
+			} else if (strcmp(pkgInfo->deviceName, "rpi") == 0) {
+				packet.destination = DESTINATION_RaspberryPi;
+			} else {
+				packet.destination = DESTINATION_UNKNOWN;
+			}
+
+			snprintf(packet.data, ENTRY_MAX_SIZE, "Version: %s, Size: %ld, Chunks: %d, Chunk Size: %d, URL: %s",
+						pkgInfo->deviceUpdateVersion, 
+						pkgInfo->totalUpdateSize, 
+						pkgInfo->totalChunks, 
+						pkgInfo->chunkSize, 
+						pkgInfo->url);
+			packet.type = FIRMWARE_UPDATE;
+
+			cJSON_Delete(json_payload);
+			free(pkgInfo);
 
 		} else if (cJSON_HasObjectItem(json_payload, "I") && cJSON_HasObjectItem(json_payload, "D") && cJSON_HasObjectItem(json_payload, "C")) { 
 			//In this case its a firmware update
