@@ -30,8 +30,8 @@ enum uplink_data_packet_type {						//Data types for going up are text and image
 	uplink_FIRMWARE_ERROR,
     uplink_FIRMWARE_ACK,
     uplink_FIRMWARE_VERSION,
-    //uplink_IMAGE,
     uplink_TRAIN_LOCATION,
+	uplink_oneM2M_JSON,
 };
 enum ble_source {
 	SOURCE_ESP32,
@@ -82,5 +82,9 @@ int downlink_aggregator_get(struct downlink_data_packet *data);
 void aggregator_clear(void);
 
 int aggregator_element_count_get(void);
+
+void publish_aggregated_data(struct k_work *work);
+
+void transmit_aggregated_data(struct k_work *work);
 
 #endif /* _AGGREGATOR_H_ */

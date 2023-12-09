@@ -57,24 +57,26 @@ For more detail, see the [readme on 9160DK](/9160dk/IPE_OTA/readme.md).
 
 The AI-Thinker ESP32-CAM is a variant of the EspressIF ESP32 with an onboard camera. The ESP32-CAM acts as an end-device on our network and is not oneM2M compliant. It must interact with the rest of the network through the 9160, which it hosts a BLE connection to.
 
+For the project, the following programs were created:
+- Connect to 9160 over BLE and accept firmware update via chunks.
+
 For demo purposes, the following programs run on the board:
 
-- Upgrade firmware from BLE
 - Take image and transmit over BLE
+*During the demo, the ESP32 was not updated for concern of system failure during rapid demonstrations.*
 
-For more detail, see the [readme on ESP32](/ESP32/readme.md).
+For more detail, see the [readme on the ESP32](/ESP32/readme.md).
 ### Raspberry Pi 4B
 
 The Raspberry Pi 4B is a powerful single-board computer, running a BCM2711 SoC. The Raspberry Pi 4B also acts as an end-device on our network and is not oneM2M compliant. It hosts software onboard to accept software updates to it, but not a full image firmware upgrade.
 
 For demo purposes, four programs run on the board:
 
-- BLE connection to 9160 DK (Accept software and photographs)
-- Train Control via GPIO pins
-- Reassemble image (photograph) from Bluetooth and show to external monitor
-- Image recognition by [MJRoBot (Marcelo Rovai) from Hackster.io](https://www.hackster.io/mjrobot/esp32-cam-tinyml-image-classification-fruits-vs-veggies-4ab970#toc-testing-the-model--inference-9)
+- BLE connection to 9160 DK (Accept image data and firmware update).
+- Train Control via GPIO pins based on GPIO data.
+*During the demo, the firmware updates were not done over BLE, but rather MQTT due to time restrictions. 
 
-For more detail, see the [readme on Raspberry Pi](/RPi/readme.md).
+For more detail, see the [readme on the Raspberry Pi](/RPi/readme.md).
 ### Django WebApp
 
 The Django WebApp is the user's point of contact with the system. It has the following capabilities:
@@ -96,7 +98,8 @@ The [Eclipse Mosquitto MQTT Broker](https://mosquitto.org/) is an open source MQ
 
 Thank you to [Exacta Global Smart Solutions](https://www.exactagss.com/) for their generous sponsorship and for guiding us through the project. Without their expertise on oneM2M and IoT solutions this project would not have been possible.  
 
+Thank you to Andreas Kraft and the other contributors to the ACME CSE for their easy to use and responsive ACME CSE. 
 
 Thank you to Dave Gamble and other contributors for the cJSON library, used extensively in MQTT communications from the 9160 in our project.
 
-Thank you to Andreas Kraft and the other contributors to the ACME CSE. 
+

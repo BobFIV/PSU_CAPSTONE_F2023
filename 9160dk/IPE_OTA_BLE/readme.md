@@ -45,8 +45,8 @@ Using these connections, it accomplishes the following:
 - **LED 1** blinking: The device is connecting to the ESP32.
 - **LED 1** lit: The device is connected to the ESP32.
 - **LED 2** blinking: The device is connecting to the Raspberry Pi
-- **LED 2** lit: The device is connected to the Raspberry Pi  
-### **LED 3** and **LED 4** reflect LTE and MQTT connections:  
+- **LED 2** lit: The device is connected to the Raspberry Pi
+**LED 3** and **LED 4**:
 - **LED 3** blinking: The device is connecting to the LTE network.
 - **LED 3** lit: The device is connected to the LTE network.
 - **LED 4** blinking: The device is receiving a firmware update over MQTT.
@@ -98,10 +98,9 @@ This is unfortunately a problem with nrf connect that is out of our control.
 
 `src` contains multiple header and source files. Although the names are self-explanatory, there is some overlap between the files. Here are the general guidelines for which files accomplish what:
 
-- `aggregator.c/aggregator.h`: The FIFO queue for uplink and downlink packets. When messages from MQTT need to be forwarded to BLE or messages from BLE need to be forward over MQTT, it is placed in its respective aggregator.
+- `aggregator.c/aggregator.h`: The FIFO queue for uplink and downlink packets. When messages from MQTT need to be forwarded to BLE or messages from BLE need to be forward over MQTT, it is placed in its respective aggregator. A work queue will publish/transmit messages from the aggregator.
 - `ble.c/ble.h`: Manages the upper layers of the BLE stack (52840 manages the lower layers). All connections, transmissions, and reception over BLE are completed here.
 - `cJSON.c/cJSON.h`: Created by Dave Gamble and cJSON contributors, open-source JSON library for C. All credit and appreciation to them.
 - `main.c/main.h`: Runs initialization for all parts of code as well as LTE and modem.
-- `mqtt_ble_pipe.c/mqtt_ble_pipe.h`: Runs the area between `aggregator.c` and `ble.c`/`mqtt_connection.c`. A message from aggregator will be sent here, then published/transmitted here based on a work timer.
 - `mqtt_connection.c/mqtt_connection.h`: manages MQTT connections to the cloud. All publishing and subscriptions are handled. Notably, all firmware validation is completed in-house here.
 - `update.c/update.h`: Although it houses variables pertaining to updates of ESP32 and Raspberry Pi, this logic only deals with updates pertaining to the 9160 using MCUboot.

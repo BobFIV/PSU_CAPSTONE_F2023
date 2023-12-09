@@ -16,10 +16,10 @@ project(lte-ble-gateway)
 target_sources(app PRIVATE src/mqtt_connection.c)
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/ble.c)
-target_sources(app PRIVATE src/mqtt_ble_pipe.c)
 target_sources(app PRIVATE src/aggregator.c)
 target_sources(app PRIVATE src/cJSON.c)
 target_sources(app PRIVATE src/update.c)
+target_sources(app PRIVATE src/oneM2Mmessages.c)
 # NORDIC SDK APP END
 
 zephyr_include_directories(src)
