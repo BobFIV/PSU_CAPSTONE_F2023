@@ -6,4 +6,4 @@ The program to run, which will swap the running code to a.py as soon as it is wr
 ## demo_v1_dumb.py:
 Only capabilities are start and stop train for demo.
 ## demo_v2_smart.py:
-Added color handling. 
+Added color handling. Used to showcase firmware updates during the demo in conjunction with control.py. 
