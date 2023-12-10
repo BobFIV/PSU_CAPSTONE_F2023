@@ -1,6 +1,8 @@
 import sys
 import dbus, dbus.mainloop.glib
 import json, _json
+from tabulate import tabulate
+import RPi.GPIO as GPIO
 from gi.repository import GLib
 from example_advertisement import Advertisement
 from example_advertisement import register_ad_cb, register_ad_error_cb
@@ -12,12 +14,12 @@ DBUS_OM_IFACE =                'org.freedesktop.DBus.ObjectManager'
 LE_ADVERTISING_MANAGER_IFACE = 'org.bluez.LEAdvertisingManager1'
 GATT_MANAGER_IFACE =           'org.bluez.GattManager1'
 GATT_CHRC_IFACE =              'org.bluez.GattCharacteristic1'
-UART_SERVICE_UUID =            '6e400001-b5a3-f393-e0a9-e50e24dcca9e'
-UART_RX_CHARACTERISTIC_UUID =  '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
-UART_TX_CHARACTERISTIC_UUID =  '6e400003-b5a3-f393-e0a9-e50e24dcca9e'
-LOCAL_NAME =                   'rpi-gatt-server'
+UART_SERVICE_UUID =            '6E400001-B5A3-F393-E0A9-E50E24DCCA9E'
+UART_RX_CHARACTERISTIC_UUID =  '6E400002-B5A3-F393-E0A9-E50E24DCCA9E'
+UART_TX_CHARACTERISTIC_UUID =  '6E400003-B5A3-F393-E0A9-E50E24DCCA9E'
+LOCAL_NAME =                   'RPi'
 mainloop = None
-
+#message = ''   tracking 
 class TxCharacteristic(Characteristic):
     def __init__(self, bus, index, service):
         Characteristic.__init__(self, bus, index, UART_TX_CHARACTERISTIC_UUID,
@@ -55,41 +57,26 @@ class RxCharacteristic(Characteristic):
     def __init__(self, bus, index, service):
         Characteristic.__init__(self, bus, index, UART_RX_CHARACTERISTIC_UUID,
                                 ['write'], service)
+        #self.file = open("datafile.txt", "wb")  # Open the datafile in wb mode
+        #self.command = open("/var/switch.txt", "ab")
+        self.file_path = "datafile.txt"
+        
 
     def WriteValue(self, value, options):
-        print('remote: {}'.format(bytearray(value).decode()))
-
-
-class Firmupdate(Characteristic):
-    def __init__(self, bus, index, service):
-        Characteristic.__init__(self, bus, index, UART_RX_CHARACTERISTIC_UUID,
-                                ['write'], service)
-        
+        message = bytearray(value).decode('utf-8', errors='ignore')
+        print('Received:', message)  # Print to command line
+        #self.file.write('')
+        #write income message to datafile
+        #self.file.write(bytearray(value))
+        #self.file.close()
+        with open(self.file_path, "w") as file:
+            file.write(message)
     
-    def updatePacket(self, value, datavalue, options):
-        pdatahead = json.loads(value)
-        pdata = json.loads(datavalue)
-        totalChunks = pdatahead['Total Update Chunks']
-        totalsize = pdatahead['total size']
-        checksum = pdatahead['Checksum_value']
-        print(f"Totoal size of message is {totalsize}")
-        currentpacket = 0
-        data = ''
-        while(currentpacket != totalChunks):
-            # update each chunk to data
-            if(currentpacket != pdata['I']):
-                NameError, print("we can't get updates for this packet: "+currentpacket)
-                #tranmit current packet to 9160 "error at 9160"In json, error 
-            else:
-                data += pdata['D'].decode('utf-8')
-                print(f'packet{currentpacket} has data' + (pdata['D'].decode('utf-8')))
-            currentpacket+=1
-        with open("datafile", "w") as file:
-            # Write a message to the file
-            file.write(data)
-            print("data has been written to datafile")
+    def __del__(self):
+        # Ensure the file is closed if the object is deleted
+        self.file.close()
 
-
+    # Additional methods and logic if needed
 
 
 class UartService(Service):
@@ -119,10 +106,6 @@ class Application(dbus.service.Object):
             for chrc in chrcs:
                 response[chrc.get_path()] = chrc.get_properties()
         return response
-    
-
-
-
 
 class UartApplication(Application):
     def __init__(self, bus):
@@ -145,6 +128,8 @@ def find_adapter(bus):
             return o
         print('Skip adapter:', o)
     return None
+
+
 
 def main():
     global mainloop
@@ -176,6 +161,11 @@ def main():
         mainloop.run()
     except KeyboardInterrupt:
         adv.Release()
+
+
+
+
+    
 
 if __name__ == '__main__':
     main()
