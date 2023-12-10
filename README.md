@@ -15,7 +15,6 @@ Sponsored by [Exacta Global Smart Solutions](https://www.exactagss.com/), a lead
 		 - [Updating the ESP32](docs/ESP32Update.md) 
 		 - [Updating the Raspberry Pi](docs/RpiUpdate.md) 
  - [BLE Communication](docs/Bluetooth.md)
- - [MQTT Communication](docs/MQTT.md) 
  - [Final Demo](docs/demo.md)
 
 ## Overview
