@@ -1,0 +1,3 @@
+[submodule "onem2m_webapp"]
+	path = onem2m_webapp
+	url = https://github.com/PingxuHao/onem2m_webapp.git
